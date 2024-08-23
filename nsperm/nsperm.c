@@ -33,7 +33,7 @@
  *	Permissions
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsperm/nsperm.c,v 1.11 2008/05/10 19:31:32 mooooooo Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsperm/nsperm.c,v 1.12 2011/08/05 11:49:45 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "ns.h"
 
@@ -580,7 +580,11 @@ AddUserCmd(Server *servPtr, Tcl_Interp *interp, int argc, char **argv)
 	     */
 
 	    *slash = '\0';
-	    if (inet_aton(net, &ip) == 0 || inet_aton(slash+1, &mask) == 0) {
+#ifndef _WIN32
+ 	    if (inet_aton(net, &ip) == 0 || inet_aton(slash+1, &mask) == 0) {
+#else
+	    if (inet_pton(AF_INET,net, &ip) == 0 || inet_pton(AF_INET,slash+1, &mask) == 0) {
+#endif
 		Tcl_AppendResult(interp, "invalid address or hostname \"",
 				 net, "\". "
 				 "should be ipaddr/netmask or hostname",

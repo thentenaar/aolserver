@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,17 +27,21 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * queue.c --
  *
  *	Routines for the managing the virtual server connection queue
  *	and service threads.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/queue.c,v 1.47 2009/12/08 04:12:19 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/queue.c,v 1.51 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 #include <math.h>
+
+#ifdef _WIN32
+static double round(double x) { return floor (x + 0.5); }
+#endif
 
 /*
  * The following structure is allocated for each new thread.  The
@@ -182,7 +186,7 @@ NsQueueConn(Conn *connPtr)
 
     if (poolPtr->threads.waiting == 0
         && poolPtr->threads.current < poolPtr->threads.max) {
-        /* 
+        /*
            Create a new thread if no thread is waiting and the number
            of currently starting or running threads is below max.
         */
@@ -190,7 +194,7 @@ NsQueueConn(Conn *connPtr)
     }
 
     poolPtr->queue.wait.num ++;
-    
+
     if (create) {
         poolPtr->threads.current ++;
         Ns_MutexUnlock(&poolPtr->lock);
@@ -203,11 +207,11 @@ NsQueueConn(Conn *connPtr)
         Ns_CondSignal(&poolPtr->cond);
         Ns_MutexUnlock(&poolPtr->lock);
     } else {
-        /* 
+        /*
            We might have missed signaling, since we are already using
            max resources, and no thread is available. In such a case
            the autorecovery at thread exist has to care to process
-           the outstanding requests 
+           the outstanding requests
         */
         Ns_MutexUnlock(&poolPtr->lock);
     }
@@ -240,7 +244,7 @@ NsTclServerObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
     Tcl_DString ds;
     static CONST char *opts[] = {
 	 "active", "all", "connections", "keepalive", "pools", "queued",
-	 "threads", "waiting", NULL, 
+	 "threads", "waiting", NULL,
     };
     enum {
 	 SActiveIdx, SAllIdx, SConnectionsIdx, SKeepaliveIdx, SPoolsIdx,
@@ -271,7 +275,7 @@ NsTclServerObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
     case SPoolsIdx:
 	/* NB: Silence compiler. */
 	break;
-	  
+
     case SWaitingIdx:
         Tcl_SetObjResult(interp, Tcl_NewIntObj(poolPtr->queue.wait.num));
 	break;
@@ -334,7 +338,7 @@ void
 NsConnArgProc(Tcl_DString *dsPtr, void *arg)
 {
     ConnData *dataPtr = arg;
-    
+
     Ns_MutexLock(&connlock);
     if (dataPtr->connPtr != NULL) {
         NsAppendConn(dsPtr, dataPtr->connPtr, "running");
@@ -372,7 +376,7 @@ NsConnThread(void *arg)
     int              status, ncons;
     char            *msg;
     double           spread;
-    
+
     /*
      * Set the conn thread name.
      */
@@ -383,13 +387,13 @@ NsConnThread(void *arg)
     Ns_MutexUnlock(&poolPtr->lock);
     Ns_ThreadSetName(name);
 
-    /* spread is a value of 1.0 +- specified percentage, 
+    /* spread is a value of 1.0 +- specified percentage,
        i.e. between 0.0 and 2.0 when the configured percentage is 100 */
     spread = 1.0 + (2 * poolPtr->threads.spread * Ns_DRand() - poolPtr->threads.spread) / 100.0;
 
     ncons = round(poolPtr->threads.maxconns * spread);
     msg = "exceeded max connections per thread";
-    
+
     /*
      * Start handling connections.
      */
@@ -405,7 +409,7 @@ NsConnThread(void *arg)
 	 * Wait for a connection to arrive, exiting if one doesn't
 	 * arrive in the configured timeout period.
 	 */
-        
+
 	if (poolPtr->threads.current <= poolPtr->threads.min) {
 	    timePtr = NULL;
 	} else {
@@ -418,8 +422,8 @@ NsConnThread(void *arg)
         while (!poolPtr->shutdown
                && status == NS_OK
                && poolPtr->queue.wait.firstPtr == NULL) {
-            /* 
-               nothing is queued, we wait for a queue entry 
+            /*
+               nothing is queued, we wait for a queue entry
             */
             poolPtr->threads.waiting++;
             status = Ns_CondTimedWait(&poolPtr->cond, &poolPtr->lock, timePtr);
@@ -436,7 +440,7 @@ NsConnThread(void *arg)
 	 */
 
     	connPtr = poolPtr->queue.wait.firstPtr;
-    	poolPtr->queue.wait.firstPtr = connPtr->nextPtr; 
+    	poolPtr->queue.wait.firstPtr = connPtr->nextPtr;
     	if (poolPtr->queue.wait.lastPtr == connPtr) {
 	    poolPtr->queue.wait.lastPtr = NULL;
     	}
@@ -461,13 +465,13 @@ NsConnThread(void *arg)
          Ns_MutexLock(&connlock);
          dataPtr->connPtr = connPtr;
          Ns_MutexUnlock(&connlock);
-         
+
          Ns_GetTime(&connPtr->times.run);
          ConnRun(connPtr);
          Ns_MutexLock(&connlock);
          dataPtr->connPtr = NULL;
          Ns_MutexUnlock(&connlock);
-         
+
          /*
           * Remove from the active list and push on the free list.
           */
@@ -488,35 +492,35 @@ NsConnThread(void *arg)
          NsFreeConn(connPtr);
          Ns_MutexLock(&poolPtr->lock);
     }
-    
+
     /*
      * Append this thread to list of threads to reap.
      */
-    
+
     Ns_MutexLock(&joinlock);
     dataPtr->nextPtr = joinPtr;
     joinPtr = dataPtr;
     Ns_MutexUnlock(&joinlock);
-    
+
     /*
      * Mark this thread as no longer active.
      */
-    
+
     if (poolPtr->shutdown) {
         msg = "shutdown pending";
     }
     poolPtr->threads.current--;
     poolPtr->threads.idle--;
-    
-    if (((poolPtr->queue.wait.num > 0 
-          && poolPtr->threads.idle == 0 
+
+    if (((poolPtr->queue.wait.num > 0
+          && poolPtr->threads.idle == 0
           && poolPtr->threads.starting == 0
           )
          || (poolPtr->threads.current < poolPtr->threads.min)
          ) && !poolPtr->shutdown) {
-        /* 
+        /*
            Recreate a thread when on of the condings hold
-           - there are more queue entries are still waiting, 
+           - there are more queue entries are still waiting,
            but no thread is either starting or idle, or
            - there are less than minthreads connection threads alive.
         */
@@ -532,7 +536,7 @@ NsConnThread(void *arg)
     } else {
         Ns_MutexUnlock(&poolPtr->lock);
     }
-    
+
     Ns_Log(Notice, "exiting: %s", msg);
     Ns_ThreadExit(dataPtr);
 }
@@ -562,11 +566,11 @@ ConnRun(Conn *connPtr)
     Ns_Conn 	  *conn = (Ns_Conn *) connPtr;
     NsServer	  *servPtr = connPtr->servPtr;
     int		   i, status;
-	
+
     /*
-     * Initialize the connection encodings. 
+     * Initialize the connection encodings.
      */
-    
+
     encoding = NsGetInputEncoding(connPtr);
     if (encoding == NULL) {
     	encoding = NsGetOutputEncoding(connPtr);
@@ -592,41 +596,7 @@ ConnRun(Conn *connPtr)
     if (connPtr->request->protocol != NULL && connPtr->request->host != NULL) {
 	status = NsConnRunProxyRequest((Ns_Conn *) connPtr);
     } else {
-	status = NsRunFilters(conn, NS_FILTER_PRE_AUTH);
-	if (status == NS_OK) {
-	    status = Ns_AuthorizeRequest(servPtr->server,
-			connPtr->request->method, connPtr->request->url, 
-			connPtr->authUser, connPtr->authPasswd, connPtr->peer);
-	    switch (status) {
-	    case NS_OK:
-		status = NsRunFilters(conn, NS_FILTER_POST_AUTH);
-		if (status == NS_OK) {
-		    status = Ns_ConnRunRequest(conn);
-		}
-		break;
-
-	    case NS_FORBIDDEN:
-		Ns_ConnReturnForbidden(conn);
-		break;
-
-	    case NS_UNAUTHORIZED:
-		Ns_ConnReturnUnauthorized(conn);
-		break;
-
-	    case NS_ERROR:
-	    default:
-		Ns_ConnReturnInternalError(conn);
-		break;
-	    }
-        } else if (status != NS_FILTER_RETURN) {
-            /* if not ok or filter_return, then the pre-auth filter coughed
-             * an error.  We are not going to proceed, but also we
-             * can't count on the filter to have sent a response
-             * back to the client.  So, send an error response.
-             */
-            Ns_ConnReturnInternalError(conn);
-            status = NS_FILTER_RETURN; /* to allow tracing to happen */
-        }
+	status = NsConnRunDirectRequest((Ns_Conn *) connPtr);
     }
     Ns_ConnClose(conn);
     if (status == NS_OK || status == NS_FILTER_RETURN) {
@@ -688,7 +658,7 @@ NsCreateConnThread(Pool *poolPtr, int joinThreads)
     Ns_MutexUnlock(&poolPtr->lock);
     Ns_ThreadCreate(NsConnThread, dataPtr, 0, &dataPtr->thread);
 }
- 
+
 
 /*
  *----------------------------------------------------------------------

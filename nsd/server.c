@@ -33,7 +33,7 @@
  *	Routines for managing NsServer structures.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/server.c,v 1.47 2008/12/05 08:51:43 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/server.c,v 1.51 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -270,6 +270,9 @@ CreateServer(char *server)
     if (!Ns_ConfigGetBool(path, "noticedetail", &i) || i) {
     	servPtr->opts.flags |= SERV_NOTICEDETAIL;
     }
+    if (!Ns_ConfigGetBool(path, "filterredirect", &i) || i) {
+    	servPtr->opts.flags |= SERV_FILTERREDIRECT;
+    }
     p = Ns_ConfigGetValue(path, "headercase");
     if (p != NULL && STRIEQ(p, "tolower")) {
     	servPtr->opts.hdrcase = ToLower;
@@ -392,6 +395,10 @@ CreateServer(char *server)
 	    i = n / 10;
 	}
 	servPtr->fastpath.cachemaxentry = i;
+	if (!Ns_ConfigGetInt(path, "cacheminage", &i) || i < 0) {
+	    i = 1;
+	}
+	servPtr->fastpath.cacheminage = i;
     	servPtr->fastpath.cache = NsFastpathCache(server, n);
     }
     if (!Ns_ConfigGetBool(path, "mmap", &servPtr->fastpath.mmap)) {

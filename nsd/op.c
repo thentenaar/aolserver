@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,14 +27,14 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * op.c --
  *
  *	Routines to register, unregister, and run connection request
  *  	routines (previously known as "op procs").
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/op.c,v 1.15 2005/10/07 00:48:23 dossy Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/op.c,v 1.19 2011/10/11 22:27:51 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -141,7 +141,7 @@ Ns_RegisterRequest(char *server, char *method, char *url, Ns_OpProc *proc,
  *	None.
  *
  * Side effects:
- *  	
+ *
  *
  *----------------------------------------------------------------------
  */
@@ -230,6 +230,15 @@ Ns_ConnRunRequest(Ns_Conn *conn)
     }
 
     /*
+     * Return entity too large error message
+     */
+
+    if (connPtr->flags & NS_CONN_ENTITYTOOLARGE) {
+        connPtr->flags &= ~NS_CONN_ENTITYTOOLARGE;
+        return Ns_ConnReturnEntityTooLarge(conn);
+    }
+
+    /*
      * Prevent infinite internal redirect loops.
      */
 
@@ -237,7 +246,9 @@ Ns_ConnRunRequest(Ns_Conn *conn)
         Ns_Log(Error, "return: failed to redirect '%s %s': "
                "exceeded recursion limit of %d",
                conn->request->method, conn->request->url, MAX_RECURSION);
-        return Ns_ConnReturnInternalError(conn);
+        return Ns_ConnReturnNotice(conn, 500, "Server Error",
+            "The requested URL cannot be accessed "
+            "due to a system error on this server.");
     }
 
     Ns_MutexLock(&ulock);
@@ -281,40 +292,20 @@ int
 Ns_ConnRedirect(Ns_Conn *conn, char *url)
 {
     Conn *connPtr = (Conn *) conn;
-    int status;
 
     ++connPtr->recursionCount;
 
     /*
      * Update the request URL.
      */
-   
+
     Ns_SetRequestUrl(conn->request, url);
 
     /*
      * Re-authorize and run the request.
      */
 
-    status = Ns_AuthorizeRequest(Ns_ConnServer(conn), conn->request->method,
-				 conn->request->url, conn->authUser,
-	 			 conn->authPasswd, Ns_ConnPeer(conn));
-    switch (status) {
-    case NS_OK:
-        status = Ns_ConnRunRequest(conn);
-        break;
-    case NS_FORBIDDEN:
-        status = Ns_ConnReturnForbidden(conn);
-        break;
-    case NS_UNAUTHORIZED:
-        status = Ns_ConnReturnUnauthorized(conn);
-        break;
-    case NS_ERROR:
-    default:
-        status = Ns_ConnReturnInternalError(conn);
-        break;
-    }
-
-    return status;
+    return NsConnRunDirectRequest(conn);
 }
 
 
@@ -456,6 +447,77 @@ NsConnRunProxyRequest(Ns_Conn *conn)
     }
     Ns_DStringFree(&ds);
     return status;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * NsConnRunDirectRequest --
+ *
+ *  	runs pre/post-auth filters and main connection
+ *
+ * Results:
+ * 	Standard request procedure result, normally NS_OK.
+ *
+ * Side effects:
+ *  	Depends on request procedure.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int NsConnRunDirectRequest(Ns_Conn *conn)
+{
+	int status;
+	Conn *connPtr = (Conn *) conn;
+
+	/*
+	 * always run pre/post-auth filters on initial request;
+	 * if this is an internal redirect then only run them
+	 * if the "filterredirect" option is set
+	 */
+	int runFilters = (connPtr->recursionCount == 0 ||
+	                  connPtr->servPtr->opts.flags & SERV_FILTERREDIRECT);
+
+	status = runFilters ?
+	         NsRunFilters(conn, NS_FILTER_PRE_AUTH) :
+		 NS_OK;
+	if (status == NS_OK) {
+	    status = Ns_AuthorizeRequest(Ns_ConnServer(conn),
+			conn->request->method, conn->request->url,
+			conn->authUser, conn->authPasswd, Ns_ConnPeer(conn));
+	    switch (status) {
+	    case NS_OK:
+		status = runFilters ?
+			 NsRunFilters(conn, NS_FILTER_POST_AUTH) :
+			 NS_OK;
+		if (status == NS_OK) {
+		    status = Ns_ConnRunRequest(conn);
+		}
+		break;
+
+	    case NS_FORBIDDEN:
+		Ns_ConnReturnForbidden(conn);
+		break;
+
+	    case NS_UNAUTHORIZED:
+		Ns_ConnReturnUnauthorized(conn);
+		break;
+
+	    case NS_ERROR:
+	    default:
+		Ns_ConnReturnInternalError(conn);
+		break;
+	    }
+        } else if (status != NS_FILTER_RETURN) {
+            /* if not ok or filter_return, then the pre-auth filter coughed
+             * an error.  We are not going to proceed, but also we
+             * can't count on the filter to have sent a response
+             * back to the client.  So, send an error response.
+             */
+            Ns_ConnReturnInternalError(conn);
+            status = NS_FILTER_RETURN; /* to allow tracing to happen */
+        }
+        return status;
 }
 
 

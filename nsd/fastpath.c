@@ -34,7 +34,7 @@
  *      Get page possibly from a file cache.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/fastpath.c,v 1.26 2006/04/19 17:48:47 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/fastpath.c,v 1.28 2011/10/07 17:06:32 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -507,9 +507,11 @@ FastReturn(NsServer *servPtr, Ns_Conn *conn, int status,
     }
 
     if (servPtr->fastpath.cache == NULL
-    	    || stPtr->st_size > servPtr->fastpath.cachemaxentry) {
+    	    || stPtr->st_size > servPtr->fastpath.cachemaxentry
+            || (time(NULL) - stPtr->st_ctime) < servPtr->fastpath.cacheminage ) {
 	/*
-	 * Caching is disabled or the entry is too large for the cache
+	 * Caching is disabled, the entry is too large for the cache,
+	 * or the inode was changed too recently to be cached safely,
 	 * so just open, mmap, and send the content directly.
 	 */
 
@@ -521,7 +523,7 @@ FastReturn(NsServer *servPtr, Ns_Conn *conn, int status,
 	}
 	if (servPtr->fastpath.mmap) {
 	    map = NsMap(fd, 0, stPtr->st_size, 0, &arg);
-	    if (map != NULL) {
+	    if (map != MAP_FAILED) {
 	    	close(fd);
 	    	fd = -1;
             	result = Ns_ConnReturnData(conn, status, map,

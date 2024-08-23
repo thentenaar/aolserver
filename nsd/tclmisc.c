@@ -34,7 +34,7 @@
  *	Implements a lot of Tcl API commands. 
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclmisc.c,v 1.32 2005/08/23 21:41:31 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclmisc.c,v 1.35 2011/09/28 05:50:47 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -599,6 +599,37 @@ NsTclCrashCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv)
 
     return TCL_ERROR;
 }
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * NsTclGetNative --
+ *
+ *      Gets a string from a Tcl_Obj in the system encoding, suitable
+ *      for passing to system calls
+ *
+ * Results:
+ *      native string
+ *
+ * Side effects:
+ *      Memory is allocated.  Caller should free result
+ *
+ *----------------------------------------------------------------------
+ */
+
+char *
+NsTclGetNative(Tcl_Obj *objPtr)
+{
+	Tcl_DString ds;
+	char *encoded, *native;
+	int len;
+	encoded=Tcl_GetStringFromObj(objPtr, &len);
+	native=ns_strdup(Tcl_UtfToExternalDString(NULL,encoded,len,&ds));
+	Tcl_DStringFree(&ds);
+	return native;
+}
+
 
 
 /*

@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -34,7 +34,7 @@
  *      Manage the Ns_Conn structure
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/conn.c,v 1.50 2009/12/08 04:12:19 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/conn.c,v 1.52 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -51,13 +51,13 @@ static Tcl_Channel MakeConnChannel(Ns_Conn *conn, int spliceout);
  *
  * Ns_ConnHeaders --
  *
- *	Get the headers 
+ *	Get the headers
  *
  * Results:
- *	An Ns_Set containing HTTP headers from the client 
+ *	An Ns_Set containing HTTP headers from the client
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -80,7 +80,7 @@ Ns_ConnHeaders(Ns_Conn *conn)
  *	A writeable Ns_Set containing headers to send back to the client
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -97,13 +97,13 @@ Ns_ConnOutputHeaders(Ns_Conn *conn)
  *
  * Ns_ConnAuthUser --
  *
- *	Get the authenticated user 
+ *	Get the authenticated user
  *
  * Results:
- *	A pointer to a string with the username 
+ *	A pointer to a string with the username
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -120,13 +120,13 @@ Ns_ConnAuthUser(Ns_Conn *conn)
  *
  * Ns_ConnAuthPasswd --
  *
- *	Get the authenticated user's password 
+ *	Get the authenticated user's password
  *
  * Results:
- *	A pointer to a string with the user's plaintext password 
+ *	A pointer to a string with the user's plaintext password
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -148,10 +148,10 @@ Ns_ConnAuthPasswd(Ns_Conn *conn)
  *	called in a "read" filter callback.
  *
  * Results:
- *	An integer content length, or 0 if none sent 
+ *	An integer content length, or 0 if none sent
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -173,10 +173,10 @@ Ns_ConnContentLength(Ns_Conn *conn)
  *	during a read filter callback during upload.
  *
  * Results:
- *	An integer content length, or 0 if none sent 
+ *	An integer content length, or 0 if none sent
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -302,13 +302,13 @@ Ns_ConnContentFd(Ns_Conn *conn)
  *
  * Ns_ConnServer --
  *
- *	Get the server name 
+ *	Get the server name
  *
  * Results:
- *	A string ptr to the server name 
+ *	A string ptr to the server name
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -327,13 +327,13 @@ Ns_ConnServer(Ns_Conn *conn)
  *
  * Ns_ConnResponseStatus --
  *
- *	Get the HTTP reponse code that will be sent 
+ *	Get the HTTP reponse code that will be sent
  *
  * Results:
- *	An integer response code (e.g., 200 for OK) 
+ *	An integer response code (e.g., 200 for OK)
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -372,7 +372,7 @@ Ns_ConnSetStatus(Ns_Conn *conn, int status)
  *	Bytes sent.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -391,13 +391,13 @@ Ns_ConnContentSent(Ns_Conn *conn)
  *
  * Ns_ConnResponseLength --
  *
- *	Get the response length 
+ *	Get the response length
  *
  * Results:
- *	integer, number of bytes to send 
+ *	integer, number of bytes to send
  *
  * Side effects:
- *	None.	
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -416,13 +416,13 @@ Ns_ConnResponseLength(Ns_Conn *conn)
  *
  * Ns_ConnPeer --
  *
- *	Get the peer's internet address 
+ *	Get the peer's internet address
  *
  * Results:
- *	A string IP address 
+ *	A string IP address
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -441,13 +441,13 @@ Ns_ConnPeer(Ns_Conn *conn)
  *
  * Ns_ConnPeerPort --
  *
- *	Get the port from which the peer is coming 
+ *	Get the port from which the peer is coming
  *
  * Results:
- *	An integer port # 
+ *	An integer port #
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -518,14 +518,14 @@ Ns_SetLocationProc(char *server, Ns_LocationProc *procPtr)
  *
  * Ns_ConnLocation --
  *
- *	Get the location of this connection. It is of the form 
- *	METHOD://HOSTNAME:PORT 
+ *	Get the location of this connection. It is of the form
+ *	METHOD://HOSTNAME:PORT
  *
  * Results:
- *	a string URL, not including path 
+ *	a string URL, not including path
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -551,13 +551,13 @@ Ns_ConnLocation(Ns_Conn *conn)
  *
  * Ns_ConnHost --
  *
- *	Get the address of the current connection 
+ *	Get the address of the current connection
  *
  * Results:
- *	A string address 
+ *	A string address
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -576,13 +576,13 @@ Ns_ConnHost(Ns_Conn *conn)
  *
  * Ns_ConnPort --
  *
- *	What server port is this connection on? 
+ *	What server port is this connection on?
  *
  * Results:
- *	Integer port number 
+ *	Integer port number
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -604,15 +604,15 @@ Ns_ConnPort(Ns_Conn *conn)
  *	Return the underlying socket for a connection.
  *
  * Results:
- *	A driver name 
+ *	A driver name
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
 
-int
+SOCKET
 Ns_ConnSock(Ns_Conn *conn)
 {
     Conn *connPtr = (Conn *) conn;
@@ -626,13 +626,13 @@ Ns_ConnSock(Ns_Conn *conn)
  *
  * Ns_ConnDriverName --
  *
- *	Return the name of this driver 
+ *	Return the name of this driver
  *
  * Results:
- *	A driver name 
+ *	A driver name
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -651,13 +651,13 @@ Ns_ConnDriverName(Ns_Conn *conn)
  *
  * Ns_ConnDriverContext --
  *
- *	Get the conn-wide context for this driver 
+ *	Get the conn-wide context for this driver
  *
  * Results:
- *	The driver-supplied context 
+ *	The driver-supplied context
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -682,7 +682,7 @@ Ns_ConnDriverContext(Ns_Conn *conn)
  *	Ns_Time value
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -707,7 +707,7 @@ Ns_ConnStartTime(Ns_Conn *conn)
  *	Integer id.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -726,13 +726,13 @@ Ns_ConnId(Ns_Conn *conn)
  *
  * Ns_ConnModifiedSince --
  *
- *	Has the data the url points to changed since a given time? 
+ *	Has the data the url points to changed since a given time?
  *
  * Results:
  *	NS_TRUE if data modified, NS_FALSE otherwise.
  *
  * Side effects:
- *	None 
+ *	None
  *
  * NOTE: This doesn't do a strict time check.  If the server flags aren't
  *       set to check modification, or if there wasn't an 'If-Modified-Since'
@@ -792,7 +792,7 @@ Ns_ConnSetType(Ns_Conn *conn, char *type)
     int len;
 
     /*
-     * If the output type is text, set the output encoding based on 
+     * If the output type is text, set the output encoding based on
      * the type charset.  If the charset is missing, use the server
      * default.
      */
@@ -894,7 +894,7 @@ Ns_ConnSetUrlEncoding(Ns_Conn *conn, Tcl_Encoding encoding)
  *	Given an conn ID, could this be a conn ID?
  *
  * Results:
- *	Boolean. 
+ *	Boolean.
  *
  * Side effects:
  *	If interp is non-null, an error message will be left if
@@ -928,10 +928,10 @@ NsTclCheckConnId(Tcl_Interp *interp, Tcl_Obj *objPtr)
  *	Get the current write encoding, keepalive, or gzip flag.
  *
  * Results:
- *	Boolean. 
+ *	Boolean.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -965,10 +965,10 @@ Ns_ConnGetGzipFlag(Ns_Conn *conn)
  *	Set the current write encoding, keepalive, or gzip flag.
  *
  * Results:
- *	void. 
+ *	void.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -1001,19 +1001,74 @@ SetFlag(Ns_Conn *conn, int bit, int flag)
     }
 }
 
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ns_ConnGetResponseContent
+ * Ns_ConnSetResponseContent
+ * Ns_ConnAppendResponseContent
+ *
+ *	get, set, or append to the response content
+ *
+ * Results:
+ *	the current content buffer
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+char *Ns_ConnGetResponseContent(Ns_Conn *conn)
+{
+    Conn *connPtr = (Conn *) conn;
+
+    if (connPtr->rbuf!= NULL) {
+        return Tcl_DStringValue(connPtr->rbuf);
+    } else {
+        return connPtr->sbuf;
+    }
+}
+
+char *Ns_ConnSetResponseContent(Ns_Conn *conn, char *content)
+{
+    Conn *connPtr = (Conn *) conn;
+
+    if (connPtr->rbuf == NULL) {
+        connPtr->rbuf=ns_malloc(sizeof(Tcl_DString));
+        Tcl_DStringInit(connPtr->rbuf);
+    }
+    Tcl_DStringSetLength(connPtr->rbuf,0);
+    Tcl_DStringAppend(connPtr->rbuf, content, -1);
+    return Tcl_DStringValue(connPtr->rbuf);
+}
+
+char *Ns_ConnAppendResponseContent(Ns_Conn *conn, char *content)
+{
+    Conn *connPtr = (Conn *) conn;
+
+    if (connPtr->rbuf == NULL) {
+        connPtr->rbuf=ns_malloc(sizeof(Tcl_DString));
+        Tcl_DStringInit(connPtr->rbuf);
+        Tcl_DStringAppend(connPtr->rbuf, connPtr->sbuf, -1);
+    }
+    Tcl_DStringAppend(connPtr->rbuf, content, -1);
+    return Tcl_DStringValue(connPtr->rbuf);
+}
+
+
 
 /*
  *----------------------------------------------------------------------
  *
  * NsTclConnObjCmd --
  *
- *	Implements ns_conn as an obj command. 
+ *	Implements ns_conn as an obj command.
  *
  * Results:
  *	Standard Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -1043,7 +1098,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	 "outputheaders", "peeraddr", "peerport", "port", "protocol",
 	 "query", "request", "server", "sock", "start", "status",
 	 "url", "urlc", "urlencoding", "urlv", "version",
-	 "write_encoded", "interp", NULL
+	 "write_encoded", "interp","gzip","responsecontent", NULL
     };
     enum {
 	 CAuthPasswordIdx, CAuthUserIdx, CChannelIdx, CCloseIdx, CAvailIdx, CContentIdx,
@@ -1054,7 +1109,8 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	 COutputHeadersIdx, CPeerAddrIdx, CPeerPortIdx, CPortIdx,
 	 CProtocolIdx, CQueryIdx, CRequestIdx, CServerIdx, CSockIdx,
 	 CStartIdx, CStatusIdx, CUrlIdx, CUrlcIdx, CUrlEncodingIdx,
-	 CUrlvIdx, CVersionIdx, CWriteEncodedIdx, CInterpIdx
+	 CUrlvIdx, CVersionIdx, CWriteEncodedIdx, CInterpIdx,
+	 CGzipIdx, CRespContentIdx
     } opt;
 
     if (objc < 2) {
@@ -1085,7 +1141,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CIsConnectedIdx:
 	    /* NB: Not reached - silence compiler warning. */
 	    break;
-		
+
 	case CUrlvIdx:
 	    if (objc == 2 || (objc == 3 && NsTclCheckConnId(NULL, objv[2]))) {
 		for (idx = 0; idx < request->urlc; idx++) {
@@ -1101,7 +1157,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CAuthUserIdx:
 	    Tcl_SetResult(interp, connPtr->authUser, TCL_STATIC);
 	    break;
-	    
+
 	case CAuthPasswordIdx:
 	    Tcl_SetResult(interp, connPtr->authPasswd, TCL_STATIC);
 	    break;
@@ -1125,7 +1181,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	    }
 	    break;
 
-  
+
 	case CContentIdx:
 	    if (objc != 2 && objc != 4) {
 		Tcl_WrongNumArgs(interp, 2, objv, "?off len?");
@@ -1141,7 +1197,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 		Tcl_SetObjResult(interp, result);
 	    }
 	    break;
-	    
+
 	case CContentLengthIdx:
 	    Tcl_SetIntObj(result, conn->contentLength);
 	    break;
@@ -1168,11 +1224,11 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 			      TCL_STATIC);
 	    }
 	    break;
-	
+
 	case CPeerAddrIdx:
 	    Tcl_SetResult(interp, Ns_ConnPeer(conn), TCL_STATIC);
 	    break;
-	
+
 	case CPeerPortIdx:
 	    Tcl_SetIntObj(result, Ns_ConnPeerPort(conn));
 	    break;
@@ -1186,7 +1242,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 		itPtr->nsconn.flags |= CONN_TCLHDRS;
 	    }
 	    break;
-	
+
 	case COutputHeadersIdx:
 	    if (itPtr->nsconn.flags & CONN_TCLOUTHDRS) {
 		Tcl_SetResult(interp, itPtr->nsconn.outhdrs, TCL_STATIC);
@@ -1196,7 +1252,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 		itPtr->nsconn.flags |= CONN_TCLOUTHDRS;
 	    }
 	    break;
-	
+
 	case CFormIdx:
 	     /* NB: Ignore any cached form if query is no longer valid. */
 	    if (!NsCheckQuery(conn)) {
@@ -1300,7 +1356,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CHostIdx:
 	    Tcl_SetResult(interp, request->host, TCL_STATIC);
 	    break;
-	
+
 	case CPortIdx:
 	    Tcl_SetIntObj(result, request->port);
 	    break;
@@ -1308,15 +1364,15 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CUrlIdx:
 	    Tcl_SetResult(interp, request->url, TCL_STATIC);
 	    break;
-	
+
 	case CQueryIdx:
 	    Tcl_SetResult(interp, request->query, TCL_STATIC);
 	    break;
-	
+
 	case CUrlcIdx:
 	    Tcl_SetIntObj(result, request->urlc);
 	    break;
-	
+
 	case CVersionIdx:
 	    Tcl_SetDoubleObj(result, request->version);
 	    break;
@@ -1328,7 +1384,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CDriverIdx:
 	    Tcl_SetResult(interp, Ns_ConnDriverName(conn), TCL_STATIC);
 	    break;
-    
+
 	case CServerIdx:
 	    Tcl_SetResult(interp, Ns_ConnServer(conn), TCL_STATIC);
 	    break;
@@ -1347,11 +1403,11 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CSockIdx:
 	    Tcl_SetIntObj(result, Ns_ConnSock(conn));
 	    break;
-	
+
 	case CIdIdx:
 	    Tcl_SetIntObj(result, Ns_ConnId(conn));
 	    break;
-	
+
 	case CFlagsIdx:
 	    Tcl_SetIntObj(result, connPtr->flags);
 	    break;
@@ -1393,6 +1449,27 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	case CInterpIdx:
 	    Tcl_SetLongObj(result, (long) interp);
 	    break;
+
+	case CGzipIdx:
+	    if (objc > 2) {
+	    	int flag;
+		if (Tcl_GetBooleanFromObj(interp, objv[2], &flag) != TCL_OK) {
+			return TCL_ERROR;
+		}
+	    	Ns_ConnSetGzipFlag(conn, flag);
+	    }
+	    Tcl_SetIntObj(result, Ns_ConnGetGzipFlag(conn));
+	    break;
+
+        case CRespContentIdx:
+            if (objc == 2) {
+                Tcl_SetResult(interp, Ns_ConnGetResponseContent(connPtr), TCL_STATIC);
+            } else if (objc == 3) {
+                Tcl_SetResult(interp, Ns_ConnSetResponseContent(connPtr, Tcl_GetString(objv[2])), TCL_STATIC);
+            } else {
+                Tcl_WrongNumArgs(interp, 2, objv, "?value?");
+                return TCL_ERROR;
+            }
     }
 
     return TCL_OK;
@@ -1404,13 +1481,13 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
  *
  * NsTclWriteContentObjCmd --
  *
- *	Implements ns_writecontent as obj command. 
+ *	Implements ns_writecontent as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -1503,7 +1580,7 @@ NsTclStartContentObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
     }
     if (NsTclGetConn((NsInterp *) arg, &conn) != TCL_OK) {
 	return TCL_ERROR;
-    } 
+    }
     Ns_ConnSetWriteEncodedFlag(conn, NS_TRUE);
     Ns_ConnSetEncoding(conn, encoding);
     return TCL_OK;
@@ -1590,7 +1667,7 @@ GetIndices(Tcl_Interp *interp, Conn *connPtr, Tcl_Obj **objv, int *offPtr, int *
  *
  *      Wraps a Tcl channel arround the current connection socket
  *      and returns the channel handle to the caller.
- *  
+ *
  * Result:
  *      Tcl_Channel handle or NULL.
  *
@@ -1606,7 +1683,7 @@ MakeConnChannel(Ns_Conn *conn, int spliceout)
     Tcl_Channel chan;
     int         sock;
     Conn       *connPtr = (Conn *) conn;
-    
+
     /*
      * Assures the socket is flushed
      */
@@ -1623,7 +1700,7 @@ MakeConnChannel(Ns_Conn *conn, int spliceout)
     if (sock == -1) {
         return NULL;
     }
-    
+
     /*
      * At this point we may also set some other
      * chan config options (binary,encoding, etc)
@@ -1634,10 +1711,13 @@ MakeConnChannel(Ns_Conn *conn, int spliceout)
     /*
      * Wrap a Tcl TCP channel arround the socket.
      */
-    
+
     chan = Tcl_MakeTcpClientChannel((ClientData)sock);
     if (chan == NULL && spliceout) {
         connPtr->sockPtr->sock = sock;
+    }
+    if (chan != NULL) {
+        Tcl_Ungets(chan,connPtr->content, connPtr->avail, 0);
     }
 
     return chan;

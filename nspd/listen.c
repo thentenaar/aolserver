@@ -34,7 +34,7 @@
  *	Listen for the external driver. 
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nspd/listen.c,v 1.3 2000/08/02 23:38:25 kriston Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nspd/listen.c,v 1.4 2011/08/05 11:49:45 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "pd.h"
 #define DEV_NULL        "/dev/null"
@@ -47,7 +47,7 @@ static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsp
  * Local functions defined in this file
  */
 
-static void     PdNewConn(int sock, int new);
+static void     PdNewConn(SOCKET sock, SOCKET new);
 static int      fdNull;
 
 /*
@@ -77,7 +77,7 @@ static int      fdNull;
 void
 PdListen(int port)
 {
-    int                sock, new;
+    SOCKET             sock, new;
     struct sockaddr_in sa;
     int                n;
 
@@ -149,7 +149,7 @@ PdListen(int port)
  */
 
 static void
-PdNewConn(int sock, int new)
+PdNewConn(SOCKET sock, SOCKET new)
 {
     int pid, status;
 

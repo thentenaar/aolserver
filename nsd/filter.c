@@ -33,7 +33,7 @@
  * Support for connection filters, traces, and cleanups.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/filter.c,v 1.10 2002/09/28 19:23:39 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/filter.c,v 1.11 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -56,6 +56,8 @@ typedef struct Trace {
     Ns_TraceProc    *proc;
     void            *arg;
 } Trace;
+
+#define FILTER_GETPRIO(when) ((signed char)((when & 0xFF000000) >> 24))
 
 static Trace *NewTrace(Ns_TraceProc *proc, void *arg);
 static void RunTraces(Ns_Conn *conn, Trace *firstPtr);
@@ -95,11 +97,20 @@ Ns_RegisterFilter(char *server, char *method, char *url,
     fPtr->url = ns_strdup(url);
     fPtr->when = when;
     fPtr->arg = arg;
-    fPtr->nextPtr = NULL;
     fPtrPtr = &servPtr->filter.firstFilterPtr;
-    while (*fPtrPtr != NULL) {
+    /* locate the first filter at this priority */
+    while (*fPtrPtr != NULL
+           && FILTER_GETPRIO(fPtr->when) > FILTER_GETPRIO((*fPtrPtr)->when)) {
     	fPtrPtr = &((*fPtrPtr)->nextPtr);
     }
+    /* if appending, locate last filter in the same priority group */
+    if (!(when & NS_FILTER_INSERT)) {
+        while (*fPtrPtr != NULL
+                && FILTER_GETPRIO(fPtr->when) == FILTER_GETPRIO((*fPtrPtr)->when)) {
+            fPtrPtr = &((*fPtrPtr)->nextPtr);
+        }
+    }
+    fPtr->nextPtr = *fPtrPtr;
     *fPtrPtr = fPtr;
     return (void *) fPtr;
 }

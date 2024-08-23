@@ -34,7 +34,7 @@
  *      Handle connection I/O.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/connio.c,v 1.28 2009/12/08 04:12:19 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/connio.c,v 1.29 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 #define IOBUFSZ 2048
@@ -134,6 +134,16 @@ Ns_ConnFlush(Ns_Conn *conn, char *buf, int len, int stream)
     Tcl_DString  enc, gzip;
     char *ahdr;
     int status;
+
+    connPtr->sbuf=buf;
+    if (NsRunFilters((Ns_Conn *) connPtr, NS_FILTER_PRE_WRITE) != NS_OK) {
+        return NS_ERROR;
+    }
+    if (connPtr->rbuf != NULL) {
+        /* the content was set by pre-write filters */
+        buf=Tcl_DStringValue(connPtr->rbuf);
+        len=Tcl_DStringLength(connPtr->rbuf);
+    }
 
     Tcl_DStringInit(&enc);
     Tcl_DStringInit(&gzip);

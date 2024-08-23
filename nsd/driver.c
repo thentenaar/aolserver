@@ -34,7 +34,7 @@
  *
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/driver.c,v 1.59 2009/12/08 04:12:19 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/driver.c,v 1.64 2011/10/13 23:42:24 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -409,6 +409,10 @@ Ns_DriverInit(char *server, char *module, Ns_DriverInitData *init)
         n = 30;         /* 30 seconds wait for more data in keep-alive.*/
     }
     drvPtr->keepwait = _MAX(n, 0); /* NB: 0 for no keepalive. */
+    if (!Ns_ConfigGetInt(path, "maxaccept", &n)) {
+        n = 10;         /* accept up to 10 connections per driver spin */
+    }
+    drvPtr->maxaccept = _MAX(n, 0); /* NB: 0 for no max. */
     if (!Ns_ConfigGetInt(path, "maxreaders", &n) || n < 1) {
         n = 10;         /* Max of 10 threads for non-event driven I/O. */
     }
@@ -1216,7 +1220,6 @@ DriverThread(void *arg)
 	/*
          * Process sockets ready to run.
 	 */
-
         while ((sockPtr = preqSockPtr) != NULL) {
             preqSockPtr = sockPtr->nextPtr;
             sockPtr->connPtr->times.ready = now;
@@ -1335,12 +1338,16 @@ dropped:
 	 * Attempt to accept new sockets.
 	 */
 
-  	if (!stop && lidx >= 0 && PollIn(&pdata, lidx)
-                && ((sockPtr = SockAccept(lsock, drvPtr)) != NULL)) {
-    	    sockPtr->acceptTime = now;
-	    sockPtr->connPtr = AllocConn(drvPtr, &now, sockPtr);
-	    SockWait(sockPtr, &now, drvPtr->recvwait, &waitPtr);
-	    ++drvPtr->stats.accepts;
+  	if (!stop && lidx >= 0 && PollIn(&pdata, lidx)) {
+	    int naccept = 0;
+	    while (drvPtr->freeSockPtr != NULL &&
+	           (drvPtr->maxaccept == 0 || naccept++ < drvPtr->maxaccept) &&
+		   (sockPtr = SockAccept(lsock, drvPtr)) != NULL) {
+		sockPtr->acceptTime = now;
+		sockPtr->connPtr = AllocConn(drvPtr, &now, sockPtr);
+		SockWait(sockPtr, &now, drvPtr->recvwait, &waitPtr);
+		++drvPtr->stats.accepts;
+	    }
 	}
 
 	/*
@@ -1482,7 +1489,7 @@ static void
 SockState(Sock *sockPtr, int state)
 {
     if (sockPtr->drvPtr->flags & DRIVER_DEBUG) {
-	Ns_Log(Notice, "%s[%d]: %s -> %s\n", sockPtr->drvPtr->name,
+	Ns_Log(Notice, "%s[%d]: %s -> %s", sockPtr->drvPtr->name,
 	       sockPtr->sock, states[sockPtr->state], states[state]);
     }
     sockPtr->state = state;
@@ -1674,7 +1681,7 @@ TriggerDriver(Driver *drvPtr)
 {
     if (send(drvPtr->trigger[1], "", 1, 0) != 1) {
 	Ns_Fatal("driver: trigger send() failed: %s",
-	    ns_sockstrerror(ns_sockerrno));
+		 ns_sockstrerror(ns_sockerrno));
     }
 }
 
@@ -1969,7 +1976,23 @@ SockReadLine(Driver *drvPtr, Ns_Sock *sock, Conn *connPtr)
         return E_NINVAL;
     }
     if (len > (int) connPtr->limitsPtr->maxupload) {
-        return E_CRANGE;
+      /*
+       * Gustaf Neumann: The entity is too large and is not allowed to
+       * be processed. In principle, we could stop processing the
+       * request here and return immediately an error message to the
+       * client. However, if the content to be sent from the client to
+       * the server is large it is likely, that at the time we process
+       * the header, the content is not fully sent yet. If the server
+       * replies and closes the connection while the client is sending
+       * the request, current browsers (e.g. Firefox, Chrome, ...)
+       * will show the user their own error message ("server has
+       * closed connection"). Therefore, in order to provide reliable
+       * error messages, we have process the full request. We flag the
+       * fact of the too large entity here and return the error
+       * message from the connection thread.
+       */
+        connPtr->flags |= NS_CONN_ENTITYTOOLARGE;
+	LogReadError(connPtr, E_CRANGE);
     }
     connPtr->contentLength = len;
 
@@ -2309,6 +2332,11 @@ FreeConn(Conn *connPtr)
     }
     Ns_SetFree(connPtr->headers);
     Ns_SetFree(connPtr->outputheaders);
+
+    if (connPtr->rbuf != NULL) {
+        Tcl_DStringFree(connPtr->rbuf);
+        ns_free(connPtr->rbuf);
+    }
 
     /*
      * Truncate the I/O buffers, zero remaining elements of the Conn,

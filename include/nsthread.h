@@ -32,7 +32,7 @@
  *
  *	Core threading and system headers.
  *
- *	$Header: /Users/dossy/Desktop/cvs/aolserver/include/nsthread.h,v 1.32 2009/12/24 19:50:06 dvrsn Exp $
+ *	$Header: /Users/dossy/Desktop/cvs/aolserver/include/nsthread.h,v 1.33 2012/09/17 18:38:25 dvrsn Exp $
  */
 
 #ifndef NSTHREAD_H
@@ -46,7 +46,11 @@
 #define NS_EXPORT		__declspec(dllexport)
 #define NS_IMPORT		__declspec(dllimport)
 #else
-#define NS_EXPORT
+# if __GNUC__ >= 4
+#  define NS_EXPORT		__attribute__ ((visibility ("default")))
+# else
+#  define NS_EXPORT
+# endif /* __GNUC__ >= 4 */
 #define NS_IMPORT
 #ifndef _REENTRANT
 #define _REENTRANT

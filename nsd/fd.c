@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -33,8 +33,8 @@
  *
  *      Manipulate file descriptors of open files.
  */
- 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/fd.c,v 1.13 2008/03/22 17:43:39 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
+
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/fd.c,v 1.14 2011/08/18 09:24:59 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 #ifdef _WIN32
@@ -98,7 +98,7 @@ NsInitFd(void)
     /*
      * Ensure fd 0, 1, and 2 are open on at least /dev/null.
      */
-     
+
     fd = open(DEVNULL, O_RDONLY);
     if (fd > 0) {
 	close(fd);
@@ -137,7 +137,7 @@ NsInitFd(void)
     	    if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
 	        Ns_Log(Warning, "fd: setrlimit(RLIMIT_NOFILE, %lld) failed: %s",
 		       rl.rlim_max, strerror(errno));
-	    } 
+	    }
 	}
 #ifdef USE_DUPHIGH
     	if (getrlimit(RLIMIT_NOFILE, &rl) == 0 && rl.rlim_cur > 256) {
@@ -311,7 +311,7 @@ Ns_GetTemp(void)
     Ns_DString ds;
     char *path, buf[64];
     int fd, flags, trys;
-    
+
     Ns_MutexLock(&lock);
     tmpPtr = firstTmpPtr;
     if (tmpPtr != NULL) {
@@ -510,7 +510,7 @@ ClosePipeOnExec(int *fds)
  *	Memory map a region of a file.
  *
  * Results:
- *	Pointer to mapped region or NULL if mapping failed.
+ *	Pointer to mapped region or MAP_FAILED if mapping failed.
  *
  * Side effects:
  *	None.
@@ -523,7 +523,7 @@ NsMap(int fd, off_t start, size_t len, int writable, void **argPtr)
 {
 #ifdef _WIN32
     /* TODO: Make this work on Win32. */
-    return NULL;
+    return MAP_FAILED;
 #else
     int prot;
 

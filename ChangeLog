@@ -1,3 +1,94 @@
+2012-09-17 Jeff Rogers <dvrsn@diphi.com>
+	* include/nsthread.h: update definition of NS_EXPORT to use modern GCC
+	visibility attributes
+	* include/ns.h: add an automatic export for ModInit proc to avoid
+	forcing all modules to change for visibility.
+	* include/ns.mak.in: add NS_MODINIT define when compiling modules
+	to pull in automatic export
+	* nsd/init.tcl: make sure to fully qualify 'namespace'.  Omit
+	'::oo' from namespace traversal until tcloo is better understood.
+
+2012-05-11 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/init.tcl: fix previous version that had renaming logic twice
+
+2011-12-13 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/init.tcl: add logic to handle commands imported from a namespace
+	and then renamed (some tcllib packages do this)
+
+2011-10-25 tag aolserver_v45_r2
+
+2011-10-25 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/nsd.h: set patchlevel to 4.5.2
+
+2011-10-13 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/nsd.h:
+	* nsd/driver.c: add tuning tweak and config variable to let
+	driver accept more than one connection per spin.
+	SF RFE #1014273
+
+2011-10-11 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/op.c: handle internal error from redirect recursion overflow
+	directly instead of redirecting to internal error page.  Prevents
+	error displaying error page from crashing server.
+
+2011-10-11 Jeff Rogers <dvrsn@diphi.com>
+	* doc/Ns_Filter.3:
+	* doc/ns_filter.n:
+	* nsd/conn.c:
+	* nsd/connio.c:
+	* nsd/driver.c:
+	* nsd/filter.c:
+	* nsd/nsd.h:
+	* nsd/op.c:
+	* nsd/queue.c:
+	* nsd/server.c:
+	* nsd/tclrequest.c:
+	* include/ns.h: add various functions, mostly from SF RFEs -
+	pre-write filter, response content modification,
+	insert/append filter, priority filters, ns_conn gzip flag,
+	re-run filters on redirect with new config option "filterredirect",
+	add new constants, fix STREQ macro
+
+2011-10-07 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/nsd.h:
+	* nsd/fastpath.c:
+	* nsd/server.c: apply patch from John Caruso to avoid fastpath
+	caching a file that has been modified too recently and possibly
+	colliding inodes.  Added new fastpath config option "cacheminage"
+	to control timing.
+
+2011-09-27 Jeff Rogers <dvrsn@diphi.com>
+	* nsd/nsd.h:
+	* nsd/tclmisc.c: add NsTclGetNative function to retrieve decoded
+	strings (rather than utf-8) from Tcl_Objs
+	* nsd/tclreturn.c: decode strings for passing to ns_returnfile
+	and ns_respond
+
+2011-08-24 Jeff Rogers <dvrsn@diphi.com>
+    * nsd/adpparse.c: enhance parsing to recognize a xml-style minimized
+    registered tag as an empty open/close sequence.  Fix to allow
+    arbitrary balanced nesting of <% %> tags (SF bug #2958550)
+
+2011-05-07 Jeff Rogers <dvrsn@diphi.com>
+    * nsthread/pthread.c: change to use passed resultArg directly so
+    thread id is always set in ConnData struct.  Fixes bug #3313417
+
+2010-10-31 Gustaf Neumann <neumann@wu-wien.ac.at>
+	* nsd/init.tcl: The original code in _ns_getensemble blindly
+	(re)creates ensembles with the consequence, that ensembles are not
+	efficiently compiled anymore (see byte code in [1]) leading to
+	slow code. This patch causes aolserver to reconfigure preexisting
+	ensembles instead of recreating it. This behavior could be seen as
+	a bug in Tcl. The fixed code is correct, even when TCT decides to
+	do something about this unpleasant behavior.
+
+	[1] http://sourceforge.net/tracker/?func=detail&aid=3098085&group_id=10894&atid=110894
+
+2010-09-09 Gustaf Neumann <neumann@wu-wien.ac.at>
+
+	* nslog/nslog.c: Quick fix for terminal escape sequence attack
+	http://www.securityfocus.com/bid/37712
+
 2009-12-24 Jeff Rogers <dvrsn@diphi.com>
 
 	* include/nsthread.h: added pre-8.6 compatibility define 

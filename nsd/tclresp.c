@@ -34,7 +34,7 @@
  *	Tcl commands for returning data to the user agent. 
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclresp.c,v 1.21 2007/01/22 03:23:15 rmadilo Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclresp.c,v 1.23 2011/09/28 05:50:47 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -239,7 +239,7 @@ error:
 	    string = Tcl_GetString(objv[i]);
 
 	} else if (STRIEQ(carg, "-file")) {
-	    filename = Tcl_GetString(objv[i]);
+	    filename = NsTclGetNative(objv[i]);
 
 	} else if (STRIEQ(carg, "-fileid")) {
 	    if (Ns_TclGetOpenChannel(interp, carg, 0, 1, &chan) != TCL_OK) {
@@ -294,6 +294,7 @@ error:
 	 */
 	
         retval = Ns_ConnReturnFile(conn, status, type, filename);
+	ns_free(filename);
 
     } else {
 	/*
@@ -327,7 +328,7 @@ int
 NsTclReturnFileObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
 		      Tcl_Obj *CONST objv[])
 {
-    int      status;
+    int      status, result;
     Ns_Conn *conn;
     char    *type, *file;
 
@@ -344,9 +345,11 @@ NsTclReturnFileObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
     if (Tcl_GetIntFromObj(interp, objv[objc-3], &status) != TCL_OK) {
         return TCL_ERROR;
     }
-    file = Tcl_GetString(objv[objc-1]);
+    file = NsTclGetNative(objv[objc-1]);
     type = Tcl_GetString(objv[objc-2]);
-    return Result(interp, Ns_ConnReturnFile(conn, status, type, file));
+    result = Ns_ConnReturnFile(conn, status, type, file);
+    ns_free(file);
+    return Result(interp, result);
 }
 
 
@@ -444,11 +447,13 @@ NsTclReturnBadRequestObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
  *
  * ReturnObjCmd --
  * NsTclReturnNotFoundObjCmd --
+ * NsTclReturnTooLargeObjCmd --
  * NsTclReturnUnauthorizedObjCmd --
  * NsTclReturnForbiddenCmd --
  *
- *	Implement the ns_returnnotfound, ns_returnunauthorized, and
- *	ns_returnforbidden generic return commands.
+ *	Implement the ns_returnnotfound, ns_returntoolarge,
+ *      ns_returnunauthorized, and ns_returnforbidden generic return
+ *      commands.
  *
  * Results:
  *	Tcl result. 
@@ -484,6 +489,14 @@ NsTclReturnNotFoundObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
 {
     return ReturnObjCmd(arg, interp, objc, objv, Ns_ConnReturnNotFound);
 }
+
+int
+NsTclReturnTooLargeObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
+			  Tcl_Obj *CONST objv[])
+{
+    return ReturnObjCmd(arg, interp, objc, objv, Ns_ConnReturnEntityTooLarge);
+}
+
 
 int
 NsTclReturnUnauthorizedObjCmd(ClientData arg, Tcl_Interp *interp, int objc,

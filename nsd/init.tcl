@@ -28,7 +28,7 @@
 #
 
 #
-# $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/init.tcl,v 1.34 2009/12/24 19:50:34 dvrsn Exp $
+# $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/init.tcl,v 1.40 2012/09/17 20:48:49 dvrsn Exp $
 #
 
 #
@@ -326,9 +326,9 @@ proc _ns_savenamespaces {} {
     _ns_getnamespaces nslist
     foreach n $nslist {
         foreach {ns_script ns_import} [_ns_getscript $n] {
-            append script [list namespace eval $n $ns_script] \n
+            append script [list ::namespace eval $n $ns_script] \n
             if {$ns_import != ""} {
-                append import [list namespace eval $n $ns_import] \n
+                append import [list ::namespace eval $n $ns_import] \n
             }
         }
     }
@@ -428,6 +428,8 @@ proc _ns_getnamespaces {listVar {top "::"}} {
     upvar $listVar list
     lappend list $top
     foreach c [namespace children $top] {
+	# skip built-in namespaces
+        if {$c in {::oo}} continue
         _ns_getnamespaces list $c
     }
 }
@@ -443,13 +445,31 @@ proc _ns_getnamespaces {listVar {top "::"}} {
 if {[catch {package require Tcl 8.5}]} {
     proc _ns_getensemble {cmd} {}
 } else {
+    #
+    # "... ensemble create ..." removes the compileProc
+    # from ensembles with compiled submethods (like e.g. "info").
+    # In such a case, "info exists ..." is not efficiently
+    # byte-code compiled and substantially slower.
+    # Therefore, we want to create only "new" ensembles and
+    # reconfigure existing ones to keep the compileProc.
+    # This is what _ns_create_or_config_ensemble does.
+    #
+    # -gustaf neumann (Oct 2010)
+    #
+    proc _ns_create_or_config_ensemble {cmd cfg} {
+       if {[info command $cmd] eq $cmd && [namespace ensemble exists $cmd]} {
+         uplevel 1 [list ::namespace ensemble configure $cmd {*}$cfg]
+       } else {
+         uplevel 1 [list ::namespace ensemble create -command $cmd {*}$cfg]
+       }
+    }
     proc _ns_getensemble {cmd} {
         ::if {[::namespace ensemble exists $cmd]} {
             ::array set _cfg [::namespace ensemble configure $cmd]
             ::set _enns $_cfg(-namespace)
             ::unset _cfg(-namespace)
-            ::set _encmd [::list namespace ensemble create -command $cmd {*}[::array get _cfg]]
-            return [::list namespace eval $_enns $_encmd]\n
+            ::set _encmd [::list ::_ns_create_or_config_ensemble $cmd [::array get _cfg]]
+            return [::list ::namespace eval $_enns $_encmd]\n
         }
     }
 }
@@ -554,7 +574,11 @@ proc _ns_getscript n {
                       [::list proc $_proc $_args [::info body $_proc]] \n
             } else {
                 # procedure imported from other namespace
-                ::append _import [::list namespace import -force $_orig] \n
+                ::append _import [::list ::namespace import -force $_orig] \n
+		# renamed after import
+		::if {[::namespace tail $_orig] != $_proc} {
+		    ::append _import [::list rename [::namespace tail $_orig] $_proc] \n
+		}
             }
         }
 
@@ -566,7 +590,7 @@ proc _ns_getscript n {
             ::set _orig [::namespace origin $_cmnd]
             ::if {[::info exists _prcs($_cmnd)] == 0 
                     && $_orig != [::namespace which -command $_cmnd]} {
-                ::append _import [::list namespace import -force $_orig] \n
+                ::append _import [::list ::namespace import -force $_orig] \n
             }
 	    ::append _import [_ns_getensemble $_cmnd]
         }
@@ -578,7 +602,7 @@ proc _ns_getscript n {
 
         ::set _exp [::namespace export]
         if {[::llength $_exp]} {
-            ::append _script [::concat namespace export $_exp] \n
+            ::append _script [::concat ::namespace export $_exp] \n
         }
 
         ::return [::list $_script $_import]

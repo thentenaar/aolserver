@@ -33,7 +33,7 @@
  *	AOLserver Ns_Main() startup routine.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/nsmain.c,v 1.65 2006/04/13 19:06:37 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/nsmain.c,v 1.66 2011/08/07 13:30:42 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -630,7 +630,16 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
 
     NsRemovePidFile(procname);
     StatusMsg(3);
+
+#ifndef _WIN32
+    /*
+     * Tcl_Finalize() hangs under Win32 and Win64, at least with Tcl
+     * 8.5 versions up to 8.5.10.We may want to reactivate this call
+     * with some later versions.
+     */
     Tcl_Finalize();
+#endif
+
     return 0;
 }
 

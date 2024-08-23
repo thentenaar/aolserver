@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -72,11 +72,13 @@
   #define POLLOUT 2
   #define POLLPRI 4
   #define POLLHUP 8
+#ifndef _WIN32
   struct pollfd {
     int fd;
     short events;
     short revents;
   };
+#endif
   extern int poll(struct pollfd *, unsigned long, int);
 #endif
 
@@ -102,6 +104,9 @@
 #ifdef _WIN32
 #define NS_SIGTERM  1
 #define NS_SIGHUP   2
+# ifndef MAP_FAILED
+#  define MAP_FAILED ((void *) (-1))
+# endif
 #else
 #define NS_SIGTERM  SIGTERM
 #define NS_SIGHUP   SIGHUP
@@ -176,12 +181,12 @@ struct _nsconf {
 	unsigned int major;
 	unsigned int minor;
     } http;
-    
+
     struct {
 	int maxelapsed;
     } sched;
 
-#ifdef _WIN32    
+#ifdef _WIN32
     struct {
 	bool checkexit;
     } exec;
@@ -306,7 +311,7 @@ typedef struct Driver {
     Ns_Mutex	 lock;		    /* Lock to protect lists below. */
     Ns_Cond 	 cond;		    /* Cond to signal reader threads,
 				     * driver query, startup, and shutdown. */
-    int     	 trigger[2];	    /* Wakeup trigger pipe. */
+    SOCKET    	 trigger[2];	    /* Wakeup trigger pipe. */
 
     Ns_DriverProc *proc;	    /* Driver callback. */
     int		 opts;		    /* Driver options. */
@@ -316,7 +321,8 @@ typedef struct Driver {
     char        *bindaddr;	    /* Numerical listen address. */
     int          port;		    /* Port in location. */
     int		 backlog;	    /* listen() backlog. */
-    
+    int		 maxaccept;	    /* connections to accept per spin. */
+
     int          maxline;           /* Maximum request line length to read. */
     int          maxheader;         /* Maximum total header length to read. */
     int		 maxinput;	    /* Maximum request bytes to read. */
@@ -353,7 +359,7 @@ typedef struct Driver {
         unsigned int overflow;
         unsigned int dropped;
     } stats;
-    
+
 } Driver;
 
 /*
@@ -415,7 +421,7 @@ typedef struct Conn {
     /*
      * Visible in an Ns_Conn:
      */
-    
+
     Ns_Request  *request;
     Ns_Set      *headers;
     Ns_Set      *outputheaders;
@@ -427,7 +433,7 @@ typedef struct Conn {
     /*
      * Visible only in a Conn:
      */
-    
+
     struct Conn *nextPtr;
     struct Conn *prevPtr;
     struct Sock *sockPtr;
@@ -483,14 +489,14 @@ typedef struct Conn {
     /*
      * The following are copied from Sock.
      */
-     
+
     char	    peer[16];	/* Client peer address. */
     int		    port;	/* Client peer port. */
 
     /*
      * The following array maintains conn local storage.
      */
-     
+
     void	   *cls[NS_CONN_MAXCLS];
     struct QueWait *queWaitPtr;
 
@@ -507,7 +513,13 @@ typedef struct Conn {
     void	   *maparg;	/* Argument for NsUnMap. */
 
     /*
-     * The following offsets are used to manage the 
+     * output buffers, used if needed
+     */
+    char           *sbuf;       /* pointer to content requested to be sent */
+    Tcl_DString	   *rbuf;	/* buffer for response content. */
+
+    /*
+     * The following offsets are used to manage the
      * buffer read-ahead process.
      *
      * NB: The ibuf and obuf dstrings must be the last elements of
@@ -579,6 +591,7 @@ typedef struct Pool {
 #define SERV_MODSINCE		0x0004	/* Check if-modified-since. */
 #define SERV_NOTICEDETAIL	0x0008	/* Add detail to notice messages. */
 #define SERV_GZIP		0x0010	/* Enable GZIP compression. */
+#define SERV_FILTERREDIRECT     0x0020  /* re-run filters on redirects */
 
 /*
  * The following struct maintains nsv's, shared string variables.
@@ -620,7 +633,7 @@ typedef struct NsServer {
 
     Tcl_Encoding           inputEncoding;
 
-    /* 
+    /*
      * The following struct maintains various server options.
      */
 
@@ -631,8 +644,8 @@ typedef struct NsServer {
     	char 	    	   *realm;
 	Ns_HeaderCaseDisposition hdrcase;
     } opts;
-    
-    /* 
+
+    /*
      * The following struct maintains conn-related limits.
      */
 
@@ -649,6 +662,7 @@ typedef struct NsServer {
 	char	    	   *diradp;
 	bool	    	    mmap;
 	int 	    	    cachemaxentry;
+	int                 cacheminage;
 	Ns_UrlToFileProc   *url2file;
 	Ns_Cache    	   *cache;
     } fastpath;
@@ -745,14 +759,14 @@ typedef struct NsServer {
     struct {
 	Ns_Mutex    	    lock;
 	Tcl_HashTable	    table;
-    } sets;    
-    
+    } sets;
+
     /*
      * The following maintains per-server nsv's.
      */
 
     Nsv nsv;
-    
+
     /*
      * The following struct maintains the vars and
      * lock for the old ns_var command.
@@ -762,7 +776,7 @@ typedef struct NsServer {
 	Ns_Mutex    	    lock;
 	Tcl_HashTable	    table;
     } var;
-    
+
     /*
      * The following struct maintains the init state
      * of ns_share variables, updated with the
@@ -788,7 +802,7 @@ typedef struct NsServer {
     } chans;
 
 } NsServer;
-    
+
 /*
  * The following structure is allocated for each interp.
  */
@@ -857,14 +871,14 @@ typedef struct NsInterp {
 	Tcl_Channel	   chan;
 	Tcl_DString	   output;
     } adp;
-    
+
     /*
      * The following table maintains private Ns_Set's
      * entered into this interp.
      */
 
     Tcl_HashTable sets;
-    
+
     /*
      * The following table maintains shared channels
      * register with the ns_chan command.
@@ -992,7 +1006,7 @@ extern int  NsStartDrivers(void);
 extern void NsWaitDriversShutdown(Ns_Time *toPtr);
 extern void NsStartSchedShutdown(void);
 extern void NsWaitSchedShutdown(Ns_Time *toPtr);
-extern void NsStartSockShutdown(void); 
+extern void NsStartSockShutdown(void);
 extern void NsWaitSockShutdown(Ns_Time *toPtr);
 extern void NsStartShutdownProcs(void);
 extern void NsWaitShutdownProcs(Ns_Time *toPtr);
@@ -1085,11 +1099,13 @@ extern void NsStopSockCallbacks(void);
 extern void NsStopScheduledProcs(void);
 extern Tcl_Encoding NsGetInputEncoding(Conn *connPtr);
 extern Tcl_Encoding NsGetOutputEncoding(Conn *connPtr);
+extern char *NsTclGetNative(Tcl_Obj *objPtr);
 
 /*
  * Proxy support
  */
 
 extern int NsConnRunProxyRequest(Ns_Conn *conn);
+extern int NsConnRunDirectRequest(Ns_Conn *conn);
 
 #endif

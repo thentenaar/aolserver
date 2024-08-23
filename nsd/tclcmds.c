@@ -33,7 +33,7 @@
  * 	Connect Tcl command names to the functions that implement them
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclcmds.c,v 1.57 2009/12/08 04:12:19 jgdavidson Exp $, compiled: " __DATE__ " " __TIME__;
+static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclcmds.c,v 1.60 2011/07/16 09:40:02 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
@@ -148,6 +148,7 @@ extern Tcl_ObjCmdProc
     NsTclReturnNotFoundObjCmd,
     NsTclReturnObjCmd,
     NsTclReturnRedirectObjCmd,
+    NsTclReturnTooLargeObjCmd,
     NsTclReturnUnauthorizedObjCmd,
     NsTclRmdirObjCmd,
     NsTclRollFileObjCmd,
@@ -376,6 +377,7 @@ static Cmd cmds[] = {
     {"ns_returnnotfound", NULL, NsTclReturnNotFoundObjCmd},
     {"ns_returnnotice", NsTclReturnNoticeCmd, NULL},
     {"ns_returnredirect", NULL, NsTclReturnRedirectObjCmd},
+    {"ns_returntoolarge", NULL, NsTclReturnTooLargeObjCmd},
     {"ns_returnunauthorized", NULL, NsTclReturnUnauthorizedObjCmd},
     {"ns_rmdir", NULL, NsTclRmdirObjCmd},
     {"ns_rollfile", NULL, NsTclRollFileObjCmd},

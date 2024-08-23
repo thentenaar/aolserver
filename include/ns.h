@@ -33,7 +33,7 @@
  *      All the public types and function declarations for the core
  *	AOLserver.
  *
- *	$Header: /Users/dossy/Desktop/cvs/aolserver/include/ns.h,v 1.89 2009/12/08 04:10:56 jgdavidson Exp $
+ *	$Header: /Users/dossy/Desktop/cvs/aolserver/include/ns.h,v 1.96 2012/09/17 20:47:35 dvrsn Exp $
  */
 
 #ifndef NS_H
@@ -41,12 +41,12 @@
 
 #define NS_MAJOR_VERSION	4
 #define NS_MINOR_VERSION	5
-#define NS_RELEASE_SERIAL	1
+#define NS_RELEASE_SERIAL	2
 #define NS_VERSION_NUM          (NS_MAJOR_VERSION * 10000 \
                                 + NS_MINOR_VERSION * 100 \
                                 + NS_RELEASE_SERIAL)
 #define NS_VERSION		"4.5"
-#define NS_PATCH_LEVEL		"4.5.1"
+#define NS_PATCH_LEVEL		"4.5.2"
 
 #define NS_ALPHA_RELEASE	0
 #define NS_BETA_RELEASE		1
@@ -87,6 +87,7 @@
 #define NS_CONN_TIMEOUT	       	  0x400
 #define NS_CONN_GZIP		  0x800
 #define NS_CONN_CHUNK		  0x1000
+#define NS_CONN_ENTITYTOOLARGE	  0x2000
 
 #define NS_CONN_MAXCLS		 16
 
@@ -102,9 +103,13 @@
 #define NS_FILTER_POST_AUTH       2
 #define NS_FILTER_TRACE           4
 #define NS_FILTER_VOID_TRACE      8
-#define NS_FILTER_PRE_QUEUE	 16
-#define NS_FILTER_READ	 	 32
-#define NS_FILTER_WRITE	 	 64
+#define NS_FILTER_PRE_QUEUE       16
+#define NS_FILTER_READ            32
+#define NS_FILTER_PRE_WRITE       64
+#define NS_FILTER_WRITE           128
+#define NS_FILTER_INSERT          (1 << 16)
+#define NS_FILTER_APPEND          0
+#define NS_FILTER_PRIORITY(p)     (((signed char)p) << 24)
 #define NS_REGISTER_SERVER_TRACE 16
 #define NS_OP_NOINHERIT		  2
 #define NS_OP_NODELETE		  4
@@ -158,6 +163,16 @@ typedef unsigned long long	ns_uint64;
 #endif
 
 typedef ns_int64 INT64;
+
+#if !defined(INT2PTR) && !defined(PTR2INT)
+#   if defined(HAVE_INTPTR_T) || defined(intptr_t)
+#       define INT2PTR(p) ((void *)(intptr_t)(p))
+#       define PTR2INT(p) ((int)(intptr_t)(p))
+#   else
+#       define INT2PTR(p) ((void *)(p))
+#       define PTR2INT(p) ((int)(p))
+#   endif
+#endif
 
 /*
  * The following flags define how Ns_Set's
@@ -218,10 +233,9 @@ NS_EXTERN int			kill(int pid, int sig);
 #else
 #define O_TEXT			0
 #define O_BINARY		0
-#define SOCKET                  int
+#define SOCKET			int
 #define INVALID_SOCKET	        (-1)
 #define SOCKET_ERROR	        (-1)
-#define NS_EXPORT
 #define ns_sockclose		close
 #define ns_socknbclose		close
 #define ns_sockioctl		ioctl
@@ -235,7 +249,7 @@ NS_EXTERN int			kill(int pid, int sig);
  */
 
 #define UCHAR(c) 		((unsigned char)(c))
-#define STREQ(a,b) 		(((*a) == (*b)) && (strcmp((a),(b)) == 0))
+#define STREQ(a,b) 		(((*(a)) == (*(b))) && (strcmp((a),(b)) == 0))
 #define STRIEQ(a,b)     	(strcasecmp((a),(b)) == 0)
 #define Ns_IndexCount(X) 	((X)->n)
 #define Ns_ListPush(elem,list)  ((list)=Ns_ListCons((elem),(list)))
@@ -669,7 +683,7 @@ NS_EXTERN int Ns_ConnPeerPort(Ns_Conn *conn);
 NS_EXTERN char *Ns_ConnLocation(Ns_Conn *conn);
 NS_EXTERN char *Ns_ConnHost(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnPort(Ns_Conn *conn);
-NS_EXTERN int Ns_ConnSock(Ns_Conn *conn);
+NS_EXTERN SOCKET Ns_ConnSock(Ns_Conn *conn);
 NS_EXTERN char *Ns_ConnDriverName(Ns_Conn *conn);
 NS_EXTERN void *Ns_ConnDriverContext(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnGetKeepAliveFlag(Ns_Conn *conn);
@@ -1043,6 +1057,7 @@ NS_EXTERN int Ns_ConnReturnNoResponse(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnReturnRedirect(Ns_Conn *conn, char *url);
 NS_EXTERN int Ns_ConnReturnBadRequest(Ns_Conn *conn, char *reason);
 NS_EXTERN int Ns_ConnReturnUnauthorized(Ns_Conn *conn);
+NS_EXTERN int Ns_ConnReturnEntityTooLarge(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnReturnForbidden(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnReturnNotFound(Ns_Conn *conn);
 NS_EXTERN int Ns_ConnReturnNotModified(Ns_Conn *conn);
@@ -1377,6 +1392,11 @@ NS_EXTERN Ns_ConnFile *Ns_ConnNextFile(Tcl_HashSearch *searchPtr);
 #define Ns_UrlDecode(p,u)       Ns_DecodeUrlCharset(p,u,NULL)
 #define Ns_EncodeUrl(p,u)       Ns_EncodeUrlCharset(p,u,NULL)
 #define Ns_DecodeUrl(p,u)       Ns_DecodeUrlCharset(p,u,NULL)
+#endif
+
+/* Module init proc automatic export */
+#ifdef NS_MODINIT
+NS_EXPORT Ns_ModuleInitProc NS_MODINIT;
 #endif
 
 #endif /* NS_H */
