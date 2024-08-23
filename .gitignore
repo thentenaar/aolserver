@@ -1,0 +1,10 @@
+*.o
+*.a
+*.so
+.*.sw?
+config.log
+config.status
+nsd/nsd
+nstclsh/nstclsh
+nsthread/nsthreadtest
+include/ns.mak
