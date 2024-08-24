@@ -33,7 +33,6 @@
  *	Permissions
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsperm/nsperm.c,v 1.12 2011/08/05 11:49:45 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "ns.h"
 

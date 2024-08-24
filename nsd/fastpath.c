@@ -34,7 +34,6 @@
  *      Get page possibly from a file cache.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/fastpath.c,v 1.28 2011/10/07 17:06:32 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 

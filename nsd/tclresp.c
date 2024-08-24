@@ -34,7 +34,6 @@
  *	Tcl commands for returning data to the user agent. 
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclresp.c,v 1.23 2011/09/28 05:50:47 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 

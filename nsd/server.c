@@ -33,7 +33,6 @@
  *	Routines for managing NsServer structures.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/server.c,v 1.51 2011/10/11 08:03:27 dvrsn Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 

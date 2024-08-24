@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -29,7 +29,7 @@
 
 /*
  * nsattrs.h --
- *      
+ *
  *	Type and programmer error checking attributes for GCC compiler.
  *
  *	$Header: /Users/dossy/Desktop/cvs/aolserver/include/nsattributes.h,v 1.4 2006/08/08 01:15:26 dossy Exp $
@@ -115,8 +115,5 @@
 #endif
 
 #endif /* __GNUC__PREREQ */
-
-#define NS_RCSID(string) static const char *RCSID _nsunused = string \
-    ", compiled: " __DATE__ " " __TIME__
 
 #endif /* NSATTRS_H */

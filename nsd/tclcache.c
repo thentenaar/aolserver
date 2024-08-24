@@ -33,7 +33,6 @@
  *	Tcl API for cache.c.  Based on work from the nscache module.
  */
 
-static const char *RCSID = "@(#) $Header: /Users/dossy/Desktop/cvs/aolserver/nsd/tclcache.c,v 1.5 2011/07/05 18:37:47 gneumann Exp $, compiled: " __DATE__ " " __TIME__;
 
 #include "nsd.h"
 
