@@ -1463,9 +1463,9 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 
         case CRespContentIdx:
             if (objc == 2) {
-                Tcl_SetResult(interp, Ns_ConnGetResponseContent(connPtr), TCL_STATIC);
+                Tcl_SetResult(interp, Ns_ConnGetResponseContent((Ns_Conn *)connPtr), TCL_STATIC);
             } else if (objc == 3) {
-                Tcl_SetResult(interp, Ns_ConnSetResponseContent(connPtr, Tcl_GetString(objv[2])), TCL_STATIC);
+                Tcl_SetResult(interp, Ns_ConnSetResponseContent((Ns_Conn *)connPtr, Tcl_GetString(objv[2])), TCL_STATIC);
             } else {
                 Tcl_WrongNumArgs(interp, 2, objv, "?value?");
                 return TCL_ERROR;
