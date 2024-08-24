@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -118,10 +118,10 @@
 #define NS_SCHED_ONCE		  2
 #define NS_SCHED_DAILY		  4
 #define NS_SCHED_WEEKLY		  8
-#define NS_SCHED_PAUSED		 16 
-#define NS_SCHED_RUNNING	 32 
+#define NS_SCHED_PAUSED		 16
+#define NS_SCHED_RUNNING	 32
 
-#define NS_SOCK_READ	 	0x01 
+#define NS_SOCK_READ	 	0x01
 #define NS_SOCK_WRITE		0x02
 #define NS_SOCK_EXCEPTION	0x04
 #define NS_SOCK_EXIT		0x08
@@ -152,7 +152,7 @@ typedef long			ns_int64;
 typedef unsigned long		ns_uint64;
 #define NS_INT_64_FORMAT_STRING "%ld"
 #elif defined(_WIN32)
-typedef int			mode_t;  /* Bug: #703061 */ 
+typedef int			mode_t;  /* Bug: #703061 */
 typedef __int64			ns_int64;
 typedef unsigned __int64	ns_uint64;
 #define NS_INT_64_FORMAT_STRING "%I64d"
@@ -163,16 +163,6 @@ typedef unsigned long long	ns_uint64;
 #endif
 
 typedef ns_int64 INT64;
-
-#if !defined(INT2PTR) && !defined(PTR2INT)
-#   if defined(HAVE_INTPTR_T) || defined(intptr_t)
-#       define INT2PTR(p) ((void *)(intptr_t)(p))
-#       define PTR2INT(p) ((int)(intptr_t)(p))
-#   else
-#       define INT2PTR(p) ((void *)(p))
-#       define PTR2INT(p) ((int)(p))
-#   endif
-#endif
 
 /*
  * The following flags define how Ns_Set's
@@ -391,13 +381,13 @@ typedef struct Ns_Conn {
 				 * specify the state of the connection. */
 } Ns_Conn;
 
-/* 
+/*
  * The following structure maintains data from an
  * updated form file.  File content can be accessed
  * at the given offset and length from the bytes
- * returned by Ns_ConnContent. 
+ * returned by Ns_ConnContent.
  */
- 
+
 typedef struct Ns_ConnFile {
     char   *name;
     Ns_Set *headers;
@@ -504,7 +494,7 @@ typedef struct Ns_DriverInitData {
 } Ns_DriverInitData;
 
 /*
- * More typedefs of functions 
+ * More typedefs of functions
  */
 
 typedef void  (Ns_ArgProc) (Tcl_DString *dsPtr, void *arg);
@@ -798,7 +788,7 @@ NS_EXTERN void Ns_IndexIntInit(Ns_Index *indexPtr, int inc);
 /*
  * see macros above for:
  *
- * Ns_IndexCount(X) 
+ * Ns_IndexCount(X)
  */
 
 /*
@@ -840,8 +830,8 @@ NS_EXTERN Ns_List *Ns_ListMapcar(Ns_List *lPtr, Ns_ElemValProc *valProc);
 NS_EXTERN void Ns_GenSeeds(unsigned long *seedsPtr, int nseeds);
 NS_EXTERN double Ns_DRand(void);
 
-/* 
- * task.c: 
+/*
+ * task.c:
  */
 
 NS_EXTERN Ns_TaskQueue *Ns_CreateTaskQueue(char *name);

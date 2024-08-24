@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * tclloop.c --
  *
  *	Replacements for the "for", "while", and "foreach" commands to be
@@ -96,7 +96,7 @@ static void LeaveLoop(NsServer *servPtr, LoopData *dataPtr);
  *	to which "for" was renamed: e.g.,
  *	"set z for; $z {set i 0} {$i<100} {incr i} {puts $i}"
  *
- *	Copied from the Tcl source with additional calls to the 
+ *	Copied from the Tcl source with additional calls to the
  *	loop control facility.
  *
  * Results:
@@ -195,7 +195,7 @@ done:
  *	a command name is computed at runtime, and is "while" or the name
  *	to which "while" was renamed: e.g., "set z while; $z {$i<100} {}"
  *
- *	Copied from the Tcl source with additional calls to the 
+ *	Copied from the Tcl source with additional calls to the
  *	loop control facility.
  *
  * Results:
@@ -299,11 +299,11 @@ NsTclForeachObjCmd(arg, interp, objc, objv)
      * the evaluation stack and that stack might be grown and reallocated
      * if the loop body requires a large amount of stack space.
      */
-    
+
 #define NUM_ARGS 9
     Tcl_Obj *(argObjStorage[NUM_ARGS]);
     Tcl_Obj **argObjv = argObjStorage;
-    
+
 #define STATIC_LIST_SIZE 4
     int indexArray[STATIC_LIST_SIZE];
     int varcListArray[STATIC_LIST_SIZE];
@@ -377,13 +377,13 @@ NsTclForeachObjCmd(arg, interp, objc, objv)
 	    result = TCL_ERROR;
 	    goto done;
 	}
-	
+
 	result = Tcl_ListObjGetElements(interp, argObjv[2+i*2],
 	        &argcList[i], &argvList[i]);
 	if (result != TCL_OK) {
 	    goto done;
 	}
-	
+
 	j = argcList[i] / varcList[i];
 	if ((argcList[i] % varcList[i]) != 0) {
 	    j++;
@@ -397,7 +397,7 @@ NsTclForeachObjCmd(arg, interp, objc, objv)
      * Iterate maxj times through the lists in parallel
      * If some value lists run out of values, set loop vars to ""
      */
-    
+
     bodyPtr = argObjv[objc-1];
     for (j = 0;  j < maxj;  j++) {
 	for (i = 0;  i < numLists;  i++) {
@@ -420,11 +420,11 @@ NsTclForeachObjCmd(arg, interp, objc, objv)
 	    if (result != TCL_OK) {
 		Tcl_Panic("Tcl_ForeachObjCmd: could not reconvert value list %d to a list object\n", i);
 	    }
-	    
+
 	    for (v = 0;  v < varcList[i];  v++) {
 		int k = index[i]++;
 		Tcl_Obj *valuePtr, *varValuePtr;
-		
+
 		if (k < argcList[i]) {
 		    valuePtr = argvList[i][k];
 		} else {
@@ -566,7 +566,7 @@ NsTclLoopCtlObjCmd(arg, interp, objc, objv)
         Ns_MutexLock(&servPtr->tcl.llock);
     	hPtr = Tcl_FirstHashEntry(&servPtr->tcl.loops, &search);
 	while (hPtr != NULL) {
-            lid = (int) Tcl_GetHashKey(&servPtr->tcl.loops, hPtr);
+            lid = PTR2INT(Tcl_GetHashKey(&servPtr->tcl.loops, hPtr));
             objPtr = Tcl_NewIntObj(lid);
             Tcl_ListObjAppendElement(interp, listPtr, objPtr);
             hPtr = Tcl_NextHashEntry(&search);
@@ -613,7 +613,7 @@ NsTclLoopCtlObjCmd(arg, interp, objc, objv)
     }
     result = TCL_OK;
     Ns_MutexLock(&servPtr->tcl.llock);
-    hPtr = Tcl_FindHashEntry(&servPtr->tcl.loops, (char *) lid);
+    hPtr = Tcl_FindHashEntry(&servPtr->tcl.loops, INT2PTR(lid));
     if (hPtr == NULL) {
 	switch (opt) {
     	case LInfoIdx:
@@ -776,9 +776,9 @@ EnterLoop(NsServer *servPtr, LoopData *dataPtr, int objc, Tcl_Obj **objv)
     do {
 	dataPtr->lid = next++;
     	dataPtr->hPtr = Tcl_CreateHashEntry(&servPtr->tcl.loops,
-					    (char *) dataPtr->lid, &new);
+					    INT2PTR(dataPtr->lid), &new);
     } while (!new);
-    Tcl_SetHashValue(dataPtr->hPtr, dataPtr); 
+    Tcl_SetHashValue(dataPtr->hPtr, dataPtr);
     Ns_MutexUnlock(&servPtr->tcl.llock);
 }
 

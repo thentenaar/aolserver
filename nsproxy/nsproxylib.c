@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -89,7 +89,7 @@ typedef struct Proxy {
     Proc *procPtr;		/* Running child process, if any. */
     Tcl_HashEntry *idPtr;	/* Pointer to proxy table entry. */
     Tcl_HashEntry *cntPtr;	/* Pointer to count of proxies allocated. */
-    Tcl_DString in;		/* Request dstring. */ 
+    Tcl_DString in;		/* Request dstring. */
 } Proxy;
 
 /*
@@ -349,7 +349,7 @@ Ns_ProxyMain(int argc, char **argv, Tcl_AppInitProc *init)
 	}
 	len = ntohl(reqPtr->len);
 	if (len == 0) {
-	    Export(NULL, TCL_OK, &out); 
+	    Export(NULL, TCL_OK, &out);
 	} else if (len > 0) {
 	    script = in.string + sizeof(Req);
 	    if (active != NULL) {
@@ -363,7 +363,7 @@ Ns_ProxyMain(int argc, char **argv, Tcl_AppInitProc *init)
 		sprintf(active, "{%.*s%s}", n, script, dots);
 	    }
 	    result = Tcl_EvalEx(interp, script, len, 0);
-	    Export(interp, result, &out); 
+	    Export(interp, result, &out);
 	    if (active != NULL) {
 		active[0] = '\0';
 	    }
@@ -441,7 +441,7 @@ ProxyObjCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	"send", "wait", "recv", NULL
     };
     enum {
-	PGetIdx, PReleaseIdx, PEvalIdx, PCleanupIdx, 
+	PGetIdx, PReleaseIdx, PEvalIdx, PCleanupIdx,
 	PConfigIdx, PPingIdx, PActiveIdx,
 	PSendIdx, PWaitIdx, PRecvIdx
     } opt;
@@ -554,7 +554,7 @@ ProxyObjCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	while (proxyPtr != NULL) {
 	    if (proxyPtr->state != Idle) {
 	    	Tcl_AppendElement(interp, proxyPtr->id);
-	    	Tcl_AppendElement(interp, proxyPtr->in.string + sizeof(Req));   
+	    	Tcl_AppendElement(interp, proxyPtr->in.string + sizeof(Req));
 	    }
 	    proxyPtr = proxyPtr->nextPtr;
 	}
@@ -562,7 +562,7 @@ ProxyObjCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	break;
 
     }
-	
+
     return result;
 }
 
@@ -839,18 +839,18 @@ GetObjCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 
 		    proxyPtr = ns_calloc(1, sizeof(Proxy));
 		    proxyPtr->poolPtr = poolPtr;
-                    
+
                     /* The user provided name is used together with a
                        constant string and a running number to the
                        proxy id.  We have to truncate the name if it
                        is too long to prevent buffer overflows; the
                        constant part "-proxy-" is 7 characters long */
                     sprintf(int_buf, "%d", poolPtr->nextid++);
-                    strncat(proxyPtr->id, poolPtr->name,  
+                    strncat(proxyPtr->id, poolPtr->name,
                             MAX_PROXY_ID_LEN - (strlen(int_buf) + 7 + 1));
                     strcat(proxyPtr->id, "-proxy-");
                     strcat(proxyPtr->id, int_buf);
-                    
+
 		    Tcl_DStringInit(&proxyPtr->in);
 		}
 		proxyPtr->nextPtr = firstPtr;
@@ -1297,7 +1297,7 @@ SendBuf(Proc *procPtr, int ms, Tcl_DString *dsPtr)
     struct iovec iov[2];
 
     ulen = htonl(dsPtr->length);
-    iov[0].iov_base = (caddr_t) &ulen;
+    iov[0].iov_base = (char *)&ulen;
     iov[0].iov_len  = sizeof(ulen);
     iov[1].iov_base = dsPtr->string;
     iov[1].iov_len  = dsPtr->length;
@@ -1341,7 +1341,7 @@ RecvBuf(Proc *procPtr, int ms, Tcl_DString *dsPtr)
     int n, len, avail;
 
     avail = dsPtr->spaceAvl - 1;
-    iov[0].iov_base = (caddr_t) &ulen;
+    iov[0].iov_base = (char *)&ulen;
     iov[0].iov_len  = sizeof(ulen);
     iov[1].iov_base = dsPtr->string;
     iov[1].iov_len  = avail;
@@ -1606,7 +1606,7 @@ Close(Proxy *proxyPtr)
     Proc *procPtr = proxyPtr->procPtr;
     static once = 0;
 
-    if (procPtr != NULL) { 
+    if (procPtr != NULL) {
     	close(procPtr->wfd);
 	Ns_MutexLock(&plock);
 	procPtr->nextPtr = firstClosePtr;
@@ -1959,7 +1959,7 @@ ProxyError(Tcl_Interp *interp, Err err)
 	break;
     case EInit:
 	code = "EInit";
-	msg = "init script failed"; 
+	msg = "init script failed";
 	break;
     case EDead:
 	code = "EDead";
@@ -1971,7 +1971,7 @@ ProxyError(Tcl_Interp *interp, Err err)
 	break;
     case EBusy:
 	code = "EBusy";
-	msg = "currently evaluating a script"; 
+	msg = "currently evaluating a script";
 	break;
     }
     Tcl_SetErrorCode(interp, "NSPROXY", code, msg, sysmsg, NULL);

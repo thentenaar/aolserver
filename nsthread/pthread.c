@@ -561,7 +561,7 @@ Ns_ThreadYield(void)
 int
 Ns_ThreadId(void)
 {
-    return (int) pthread_self();
+    return PTR2INT(pthread_self());
 }
 
 
@@ -1036,7 +1036,7 @@ static void
 StackPages(Thread *thrPtr, int mark)
 {
     Ns_Time now;
-    caddr_t start, end, guard, base;
+    char *start, *end, *guard, *base;
     int fd, overflow, pagewords, pages, maxpage, bytes;
     uint32_t *ip;
     char file[100];
@@ -1050,12 +1050,12 @@ StackPages(Thread *thrPtr, int mark)
      */
 
     if (stackdown) {
-	start = thrPtr->stackaddr - thrPtr->stacksize + guardsize;
-	end   = thrPtr->stackaddr - pagesize;
+	start = (char *)thrPtr->stackaddr - thrPtr->stacksize + guardsize;
+	end   = (char *)thrPtr->stackaddr - pagesize;
 	guard = start - guardsize;
     } else {
-	start = thrPtr->stackaddr + pagesize;
-	end = thrPtr->stackaddr + thrPtr->stacksize - guardsize;
+	start = (char *)thrPtr->stackaddr + pagesize;
+	end = (char *)thrPtr->stackaddr + thrPtr->stacksize - guardsize;
 	guard = end;
     }
 

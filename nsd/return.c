@@ -151,8 +151,7 @@ RegisterRedirect(NsServer *servPtr, int status, char *url)
     int            new;
 
     if (servPtr != NULL) {
-    	hPtr = Tcl_CreateHashEntry(&servPtr->request.redirect,
-				   (char *) status, &new);
+    	hPtr = Tcl_CreateHashEntry(&servPtr->request.redirect, INT2PTR(status), &new);
     	if (!new) {
 	    ns_free(Tcl_GetHashValue(hPtr));
     	}
@@ -1327,7 +1326,7 @@ ReturnRedirect(Ns_Conn *conn, int status, int *resultPtr)
 
     connPtr = (Conn *) conn;
     servPtr = connPtr->servPtr;
-    hPtr = Tcl_FindHashEntry(&servPtr->request.redirect, (char *) status);
+    hPtr = Tcl_FindHashEntry(&servPtr->request.redirect, INT2PTR(status));
     if (hPtr != NULL) {
         *resultPtr = Ns_ConnRedirect(conn, Tcl_GetHashValue(hPtr));
         return 1;

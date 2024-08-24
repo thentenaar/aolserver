@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,13 +27,12 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * nsmain.c --
  *
  *	AOLserver Ns_Main() startup routine.
  */
-
-
+#include <grp.h>
 #include "nsd.h"
 
 /*
@@ -134,7 +133,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
      * AOLserver requires file descriptor 0 be open on /dev/null to
      * ensure the server never blocks reading stdin.
      */
-     
+
     if (dup2(Ns_DevNull(), 0) == -1) {
 	Ns_Log(Warning, "dup2(/dev/null, 0) failed: %s", strerror(errno));
     }
@@ -214,7 +213,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
         }
     }
     if (mode == 'V') {
-        printf("AOLserver/%s (%s)\n", NSD_VERSION, Ns_InfoLabel()); 
+        printf("AOLserver/%s (%s)\n", NSD_VERSION, Ns_InfoLabel());
 	printf("   CVS Tag:         %s\n", Ns_InfoTag());
 	printf("   Built:           %s\n", Ns_InfoBuildDate());
 	printf("   Tcl version:     %s\n", nsconf.tcl.version);
@@ -332,7 +331,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
      * Linux 2.4+, it can be set again using prctl() so that we can
      * get core files.
      */
-     
+
     if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) < 0) {
         Ns_Fatal("nsmain: prctl(PR_SET_DUMPABLE) failed: %s",
                 strerror(errno));
@@ -340,7 +339,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
 #endif
 
     /*
-     * Fork into the background and create a new session if running 
+     * Fork into the background and create a new session if running
      * in daemon mode.
      */
 
@@ -406,7 +405,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
     /*
      * Verify and change to the home directory.
      */
-     
+
     nsconf.home = NsParamString("home", NULL);
     if (nsconf.home == NULL) {
 	Ns_Fatal("nsmain: missing: [%s]home", NS_CONFIG_PARAMETERS);
@@ -472,17 +471,17 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
      * Open the log file now that the home directory and runtime
      * user id have been set.
      */
-     
+
     if (mode != 'f') {
     	NsLogOpen();
     }
 
     /*
      * Log the first startup message which should be the first
-     * output to the open log file unless the config script 
+     * output to the open log file unless the config script
      * generated some messages.
      */
-     
+
     StatusMsg(0);
 
 #ifndef _WIN32
@@ -490,14 +489,14 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
     /*
      * Log the current open file limit.
      */
-     
+
     if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
 	Ns_Log(Warning, "nsmain: "
                 "getrlimit(RLIMIT_NOFILE) failed: %s", strerror(errno));
     } else {
 	Ns_Log(Notice, "nsmain: "
-	       "max files: FD_SETSIZE = %d, rl_cur = %d, rl_max = %d",
-	       FD_SETSIZE, rl.rlim_cur, rl.rlim_max);
+	       "max files: FD_SETSIZE = %d, rl_cur = %lu, rl_max = %lu",
+	       FD_SETSIZE, (unsigned long)rl.rlim_cur, (unsigned long)rl.rlim_max);
 	if (rl.rlim_max > FD_SETSIZE) {
             Ns_Log(Warning, "nsmain: rl_max > FD_SETSIZE");
 	}
@@ -602,7 +601,7 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
      * for them to complete.
      */
 
-    NsStartSchedShutdown(); 
+    NsStartSchedShutdown();
     NsStartSockShutdown();
     NsStartQueueShutdown();
     NsStartJobsShutdown();
@@ -648,14 +647,14 @@ Ns_Main(int argc, char **argv, Ns_ServerInitProc *initProc)
  *
  * Ns_WaitForStartup --
  *
- *	Blocks thread until the server has completed loading modules, 
- *	sourcing Tcl, and is ready to begin normal operation. 
+ *	Blocks thread until the server has completed loading modules,
+ *	sourcing Tcl, and is ready to begin normal operation.
  *
  * Results:
- *	NS_OK/NS_ERROR 
+ *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -665,7 +664,7 @@ Ns_WaitForStartup(void)
 {
 
     /*
-     * This dirty-read is worth the effort. 
+     * This dirty-read is worth the effort.
      */
     if (nsconf.state.started) {
         return NS_OK;
@@ -691,7 +690,7 @@ Ns_WaitForStartup(void)
  *	None.
  *
  * Side effects:
- *	Server will begin shutdown process. 
+ *	Server will begin shutdown process.
  *
  *----------------------------------------------------------------------
  */
@@ -709,13 +708,13 @@ Ns_StopServer(char *server)
  *
  * NsTclShutdownObjCmd --
  *
- *	Implements ns_shutdown as obj command. 
+ *	Implements ns_shutdown as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -844,7 +843,7 @@ UsageError(char *msg)
 	    "\n", nsconf.argv0);
     exit(msg ? 1 : 0);
 }
-    
+
 
 /*
  *----------------------------------------------------------------------

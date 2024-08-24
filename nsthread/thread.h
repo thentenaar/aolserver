@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -40,10 +40,6 @@
 
 #define NSTHREAD_EXPORTS
 #include "nsthread.h"
-
-#ifdef WIN32
-typedef char *caddr_t;
-#endif
 
 extern int    NsGetStack(void **addrPtr, size_t *sizePtr);
 extern void   NsthreadsInit(void);

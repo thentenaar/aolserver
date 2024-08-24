@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * tls.c --
  *
  *	Thread local storage support for nsthreads.  Note that the nsthread
@@ -45,7 +45,7 @@
 
 int nsThreadMaxTls = NS_THREAD_MAXTLS;
 
-/* 
+/*
  * Static functions defined in this file.
  */
 
@@ -81,7 +81,7 @@ Ns_TlsAlloc(Ns_Tls *keyPtr, Ns_TlsCleanup *cleanup)
     key = nextkey++;
     cleanupProcs[key] = cleanup;
     Ns_MasterUnlock();
-    *keyPtr = (void *) key;
+    *keyPtr = INT2PTR(key);
 }
 
 
@@ -105,7 +105,7 @@ void
 Ns_TlsSet(Ns_Tls *keyPtr, void *value)
 {
     void **slots = NsGetTls();
-    int key = (int) (*keyPtr);
+    int key = PTR2INT(*keyPtr);
 
     if (key < 1 || key >= NS_THREAD_MAXTLS) {
 	Tcl_Panic("Ns_TlsSet: invalid key: %d: should be between 1 and %d",
@@ -135,7 +135,7 @@ void *
 Ns_TlsGet(Ns_Tls *keyPtr)
 {
     void **slots = NsGetTls();
-    int key = (int) (*keyPtr);
+    int key = PTR2INT(*keyPtr);
 
     if (key < 1 || key >= NS_THREAD_MAXTLS) {
 	Tcl_Panic("Ns_TlsGet: invalid key: %d: should be between 1 and %d",

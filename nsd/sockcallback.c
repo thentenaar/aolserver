@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -77,14 +77,14 @@ static Tcl_HashTable table;
  *
  * Ns_SockCallback --
  *
- *	Register a callback to be run when a socket reaches a certain 
- *	state. 
+ *	Register a callback to be run when a socket reaches a certain
+ *	state.
  *
  * Results:
- *	NS_OK/NS_ERROR 
+ *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	Will wake up the callback thread. 
+ *	Will wake up the callback thread.
  *
  *----------------------------------------------------------------------
  */
@@ -108,7 +108,7 @@ Ns_SockCallback(SOCKET sock, Ns_SockProc *proc, void *arg, int when)
  *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	Will wake up the callback thread. 
+ *	Will wake up the callback thread.
  *
  *----------------------------------------------------------------------
  */
@@ -157,7 +157,7 @@ void
 NsWaitSockShutdown(Ns_Time *toPtr)
 {
     int status;
-    
+
     status = NS_OK;
     Ns_MutexLock(&lock);
     while (status == NS_OK && running) {
@@ -270,7 +270,7 @@ QueueSock(SOCKET sock, Ns_SockProc *proc, void *arg, int when)
  *	Run callbacks registered with Ns_SockCallback.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	Depends on callbacks.
@@ -304,7 +304,7 @@ SockCallbackThread(void *ignored)
     pfds = ns_malloc(sizeof(struct pollfd) * max);
     pfds[0].fd = trigPipe[0];
     pfds[0].events = POLLIN;
-    
+
     while (1) {
 
 	/*
@@ -318,7 +318,7 @@ SockCallbackThread(void *ignored)
         lastCallbackPtr = NULL;
 	stop = shutdownPending;
 	Ns_MutexUnlock(&lock);
-    
+
 	/*
     	 * Move any queued callbacks to the active table.
 	 */
@@ -326,7 +326,7 @@ SockCallbackThread(void *ignored)
         while (cbPtr != NULL) {
             nextPtr = cbPtr->nextPtr;
             if (cbPtr->when & NS_SOCK_CANCEL) {
-                hPtr = Tcl_FindHashEntry(&table, (char *) cbPtr->sock);
+                hPtr = Tcl_FindHashEntry(&table, INT2PTR(cbPtr->sock));
                 if (hPtr != NULL) {
                     ns_free(Tcl_GetHashValue(hPtr));
                     Tcl_DeleteHashEntry(hPtr);
@@ -337,7 +337,7 @@ SockCallbackThread(void *ignored)
                 }
                 ns_free(cbPtr);
             } else {
-                hPtr = Tcl_CreateHashEntry(&table, (char *) cbPtr->sock, &new);
+                hPtr = Tcl_CreateHashEntry(&table, INT2PTR(cbPtr->sock), &new);
                 if (!new) {
                     ns_free(Tcl_GetHashValue(hPtr));
                 }
@@ -392,7 +392,7 @@ SockCallbackThread(void *ignored)
     	/*
 	 * Execute any ready callbacks.
 	 */
-	 
+
     	hPtr = Tcl_FirstHashEntry(&table, &search);
 	while (n > 0 && hPtr != NULL) {
 	    cbPtr = Tcl_GetHashValue(hPtr);

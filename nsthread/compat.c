@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * compat.c --
  *
  *	Unsupported routines.
@@ -182,7 +182,7 @@ Ns_AbsTimedWaitForEvent(Ns_Event *event, Ns_Mutex *lock, time_t abstime)
 }
 
 int
-Ns_UTimedWaitForEvent(Ns_Event *event, Ns_Mutex *lock, 
+Ns_UTimedWaitForEvent(Ns_Event *event, Ns_Mutex *lock,
 		      int seconds, int microseconds)
 {
     Ns_Time to, *timePtr;
@@ -206,7 +206,7 @@ Ns_InitializeRWLock(Ns_RWLock *lock)
     return NS_OK;
 }
 
-int 
+int
 Ns_DestroyRWLock(Ns_RWLock *lock)
 {
     Ns_RWLockDestroy(lock);
@@ -214,7 +214,7 @@ Ns_DestroyRWLock(Ns_RWLock *lock)
     return NS_OK;
 }
 
-int 
+int
 Ns_ReadLockRWLock(Ns_RWLock *lock)
 {
     Ns_RWLockRdLock(lock);
@@ -223,7 +223,7 @@ Ns_ReadLockRWLock(Ns_RWLock *lock)
 }
 
 
-int 
+int
 Ns_ReadUnlockRWLock(Ns_RWLock *lock)
 {
     Ns_RWLockUnlock(lock);
@@ -231,7 +231,7 @@ Ns_ReadUnlockRWLock(Ns_RWLock *lock)
     return NS_OK;
 }
 
-int 
+int
 Ns_WriteLockRWLock(Ns_RWLock *lock)
 {
     Ns_RWLockWrLock(lock);
@@ -239,7 +239,7 @@ Ns_WriteLockRWLock(Ns_RWLock *lock)
     return NS_OK;
 }
 
-int 
+int
 Ns_WriteUnlockRWLock(Ns_RWLock *lock)
 {
     Ns_RWLockUnlock(lock);
@@ -322,7 +322,7 @@ Ns_WaitThread(Ns_Thread *thrPtr, int *exitCodePtr)
 
     Ns_ThreadJoin(thrPtr, &arg);
     if (exitCodePtr != NULL) {
-	*exitCodePtr = (int) arg;
+	*exitCodePtr = PTR2INT(arg);
     }
     return NS_OK;
 }
@@ -331,7 +331,7 @@ Ns_WaitThread(Ns_Thread *thrPtr, int *exitCodePtr)
 void
 Ns_ExitThread(int exitCode)
 {
-    Ns_ThreadExit((void *) exitCode);
+    Ns_ThreadExit(INT2PTR(exitCode));
 }
 
 int
@@ -393,17 +393,17 @@ void *
 Ns_ThreadMalloc(size_t size)
 {
     return ns_malloc(size);
-}    
+}
 
 void *
 Ns_ThreadRealloc(void *ptr, size_t size)
-{   
+{
     return ns_realloc(ptr, size);
 }
 
 void
 Ns_ThreadFree(void *ptr)
-{   
+{
     ns_free(ptr);
 }
 
@@ -524,7 +524,7 @@ Ns_Calloc(size_t nelem, size_t elsize)
 #undef Ns_Free
 #endif
 
-void 
+void
 Ns_Free(void *ptr)
 {
     ns_free(ptr);

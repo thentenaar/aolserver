@@ -130,7 +130,6 @@ int
 NsPerm_ModInit(char *server, char *module)
 {
     Server *servPtr;
-    char *path;
     Tcl_HashEntry *hPtr;
     int new;
 
@@ -140,7 +139,6 @@ NsPerm_ModInit(char *server, char *module)
     }
     servPtr = ns_malloc(sizeof(Server));
     servPtr->server = server;
-    path = Ns_ConfigGetPath(server, module, NULL);
     Tcl_InitHashTable(&servPtr->users, TCL_STRING_KEYS);
     Tcl_InitHashTable(&servPtr->groups, TCL_STRING_KEYS);
     Ns_RWLockInit(&servPtr->lock);
@@ -424,7 +422,7 @@ ValidateUserAddr(User *userPtr, char *peer)
 
     hPtr = Tcl_FirstHashEntry(&userPtr->masks, &search);
     while (hPtr != NULL) {
-	mask.s_addr = (unsigned long) Tcl_GetHashKey(&userPtr->masks, hPtr);
+	mask.s_addr = (unsigned long)Tcl_GetHashKey(&userPtr->masks, hPtr);
 	ip.s_addr = peerip.s_addr & mask.s_addr;
 
 	/*
@@ -432,8 +430,8 @@ ValidateUserAddr(User *userPtr, char *peer)
 	 * right address's mask.
 	 */
 
-	entryPtr = Tcl_FindHashEntry(&userPtr->nets, (char *) ip.s_addr);
-	if (entryPtr != NULL && mask.s_addr == (unsigned long) Tcl_GetHashValue(entryPtr)) {
+	entryPtr = Tcl_FindHashEntry(&userPtr->nets, INT2PTR(ip.s_addr));
+	if (entryPtr != NULL && mask.s_addr == (unsigned long)Tcl_GetHashValue(entryPtr)) {
 	    if (userPtr->filterallow) {
 		return NS_TRUE;
 	    } else {
@@ -608,10 +606,8 @@ AddUserCmd(Server *servPtr, Tcl_Interp *interp, int argc, char **argv)
 	     * on the hash table of networks.
 	     */
 
-	    (void) Tcl_CreateHashEntry(&userPtr->masks,
-					(char *) mask.s_addr, &new);
-
-	    hPtr = Tcl_CreateHashEntry(&userPtr->nets, (char *) ip.s_addr, &new);
+	    Tcl_CreateHashEntry(&userPtr->masks, INT2PTR(mask.s_addr), &new);
+	    hPtr = Tcl_CreateHashEntry(&userPtr->nets, INT2PTR(ip.s_addr), &new);
 	    Tcl_SetHashValue(hPtr, mask.s_addr);
 	}
 	if (!new) {

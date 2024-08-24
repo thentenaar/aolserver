@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * cls.c --
  *
  *	Connection local storage.
@@ -37,7 +37,7 @@
 
 #include "nsd.h"
 
-/* 
+/*
  * Static functions defined in this file.
  */
 
@@ -74,7 +74,7 @@ Ns_ClsAlloc(Ns_Cls *clsPtr, Ns_Callback *cleanup)
     id = nextId++;
     cleanupProcs[id] = cleanup;
     Ns_MasterUnlock();
-    *clsPtr = (void *) id;
+    *clsPtr = INT2PTR(id);
 }
 
 
@@ -135,7 +135,7 @@ Ns_ClsGet(Ns_Cls *clsPtr, Ns_Conn *conn)
  *
  * NsClsCleanup --
  *
- *	Cleanup connection local storage in a manner similar to 
+ *	Cleanup connection local storage in a manner similar to
  *	thread local storage.
  *
  * Results:
@@ -189,7 +189,7 @@ static void **
 GetSlot(Ns_Cls *clsPtr, Ns_Conn *conn)
 {
     Conn *connPtr = (Conn *) conn;
-    int idx = (int) *clsPtr;
+    int idx = PTR2INT(*clsPtr);
 
     if (idx < 1 || idx >= NS_CONN_MAXCLS) {
 	Ns_Fatal("Ns_Cls: invalid key: %d: must be between 1 and %d",

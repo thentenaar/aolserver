@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * dbinit.c --
  *
  *	This file contains routines for creating and accessing
@@ -396,7 +396,7 @@ Ns_DbPoolGetMultipleHandles(Ns_DbHandle **handles, char *pool, int nwant)
  */
 
 int
-Ns_DbPoolTimedGetMultipleHandles(Ns_DbHandle **handles, char *pool, 
+Ns_DbPoolTimedGetMultipleHandles(Ns_DbHandle **handles, char *pool,
     				 int nwant, int wait)
 {
     Handle    *handlePtr;
@@ -410,7 +410,7 @@ Ns_DbPoolTimedGetMultipleHandles(Ns_DbHandle **handles, char *pool,
      * and that the calling thread does not already own handles from
      * this pool.
      */
-     
+
     poolPtr = GetPool(pool);
     if (poolPtr == NULL) {
 	Ns_Log(Error, "dbinit: no such pool '%s'", pool);
@@ -430,13 +430,13 @@ Ns_DbPoolTimedGetMultipleHandles(Ns_DbHandle **handles, char *pool,
 	IncrCount(poolPtr, -nwant);
 	return NS_ERROR;
     }
-    
+
     /*
      * Wait until this thread can be the exclusive thread aquireing
      * handles and then wait until all requested handles are available,
      * watching for timeout in either of these waits.
      */
-     
+
     if (wait < 0) {
 	timePtr = NULL;
     } else {
@@ -528,7 +528,7 @@ Ns_DbBouncePool(char *pool)
 {
     Pool	*poolPtr;
     Handle	*handlePtr;
-    
+
     poolPtr = GetPool(pool);
     if (poolPtr == NULL) {
 	return NS_ERROR;
@@ -589,7 +589,7 @@ NsDbInitPools(void)
 	hPtr = Tcl_CreateHashEntry(&poolsTable, pool, &new);
 	if (!new) {
 	    Ns_Log(Error, "dbinit: duplicate pool: %s", pool);
-	    continue;	
+	    continue;
 	}
 	path = Ns_ConfigGetPath(NULL, NULL, "db", "pool", pool, NULL);
 	driver = Ns_ConfigGetValue(path, "driver");
@@ -741,7 +741,7 @@ NsDbLogSql(Ns_DbHandle *handle, char *sql)
 
     if (handle->dsExceptionMsg.length > 0) {
         if (handlePtr->poolPtr->fVerboseError || handle->verbose) {
-	    
+
             Ns_Log(Error, "dbinit: error(%s,%s): '%s'",
 		   handle->datasource, handle->dsExceptionMsg.string, sql);
         }
@@ -870,11 +870,11 @@ static int
 IsStale(Handle *handlePtr, time_t now)
 {
     time_t    minAccess, minOpen;
-    
+
     if (handlePtr->connected) {
 	minAccess = now - handlePtr->poolPtr->maxidle;
 	minOpen = now - handlePtr->poolPtr->maxopen;
-	if ((handlePtr->poolPtr->maxidle && handlePtr->atime < minAccess) || 
+	if ((handlePtr->poolPtr->maxidle && handlePtr->atime < minAccess) ||
 	    (handlePtr->poolPtr->maxopen && (handlePtr->otime < minOpen)) ||
 	    (handlePtr->stale == NS_TRUE) ||
 	    (handlePtr->poolPtr->stale_on_close > handlePtr->stale_on_close)) {
@@ -1039,7 +1039,7 @@ CreatePool(char *pool, char *path, char *driver)
     poolPtr->stale_on_close = 0;
     if (!Ns_ConfigGetBool(path, "verbose", &poolPtr->fVerbose)) {
         poolPtr->fVerbose = 0;
-    } 
+    }
     if (!Ns_ConfigGetBool(path, "logsqlerrors", &poolPtr->fVerboseError)) {
 	poolPtr->fVerboseError = 0;
     }
@@ -1157,17 +1157,17 @@ IncrCount(Pool *poolPtr, int incr)
 	Tcl_InitHashTable(tablePtr, TCL_ONE_WORD_KEYS);
 	Ns_TlsSet(&tls, tablePtr);
     }
-    hPtr = Tcl_CreateHashEntry(tablePtr, (char *) poolPtr, &new);
+    hPtr = Tcl_CreateHashEntry(tablePtr, poolPtr, &new);
     if (new) {
 	prev = 0;
     } else {
-	prev = (int) Tcl_GetHashValue(hPtr);
+	prev = PTR2INT(Tcl_GetHashValue(hPtr));
     }
     count = prev + incr;
     if (count == 0) {
 	Tcl_DeleteHashEntry(hPtr);
     } else {
-	Tcl_SetHashValue(hPtr, (ClientData) count);
+	Tcl_SetHashValue(hPtr, INT2PTR(count));
     }
     return prev;
 }

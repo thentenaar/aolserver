@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -31,8 +31,8 @@
 /*
  * listen.c --
  *
- *	Listen on sockets and register callbacks for incoming 
- *	connections. 
+ *	Listen on sockets and register callbacks for incoming
+ *	connections.
  */
 
 
@@ -51,7 +51,7 @@ typedef struct ListenData {
  * Local functions defined in this file
  */
 
-static Ns_SockProc  ListenProc; 
+static Ns_SockProc  ListenProc;
 
 /*
  * Static variables defined in this file
@@ -72,7 +72,7 @@ static Ns_Mutex      lock;            /* Lock around portsTable. */
  *	None.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -91,14 +91,14 @@ NsInitListen(void)
  *
  * Ns_SockListenCallback --
  *
- *	Listen on an address/port and register a callback to be run 
- *	when connections come in on it. 
+ *	Listen on an address/port and register a callback to be run
+ *	when connections come in on it.
  *
  * Results:
- *	NS_OK/NS_ERROR 
+ *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -120,7 +120,7 @@ Ns_SockListenCallback(char *addr, int port, Ns_SockProc *proc, void *arg)
         /*
 	 * Make sure we can bind to the specified interface.
 	 */
-	
+
         sa.sin_port = 0;
         sock = Ns_SockBind(&sa);
         if (sock == INVALID_SOCKET) {
@@ -135,8 +135,8 @@ Ns_SockListenCallback(char *addr, int port, Ns_SockProc *proc, void *arg)
      * Update the global hash table that keeps track of which ports
      * we're listening on.
      */
-  
-    hPtr = Tcl_CreateHashEntry(&portsTable, (char *) port, &new);
+
+    hPtr = Tcl_CreateHashEntry(&portsTable, INT2PTR(port), &new);
     if (new == 0) {
         tablePtr = Tcl_GetHashValue(hPtr);
     } else {
@@ -154,7 +154,7 @@ Ns_SockListenCallback(char *addr, int port, Ns_SockProc *proc, void *arg)
         }
     }
     if (status == NS_OK) {
-        hPtr = Tcl_CreateHashEntry(tablePtr, (char *) sa.sin_addr.s_addr, &new);
+        hPtr = Tcl_CreateHashEntry(tablePtr, INT2PTR(sa.sin_addr.s_addr), &new);
         if (!new) {
             status = NS_ERROR;
         } else {
@@ -165,7 +165,6 @@ Ns_SockListenCallback(char *addr, int port, Ns_SockProc *proc, void *arg)
         }
     }
     Ns_MutexUnlock(&lock);
-    
     return status;
 }
 
@@ -175,14 +174,14 @@ Ns_SockListenCallback(char *addr, int port, Ns_SockProc *proc, void *arg)
  *
  * Ns_SockPortBound --
  *
- *	Determine if we're already listening on a given port on any 
- *	address. 
+ *	Determine if we're already listening on a given port on any
+ *	address.
  *
  * Results:
- *	Boolean: true=yes, false=no. 
+ *	Boolean: true=yes, false=no.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -193,7 +192,7 @@ Ns_SockPortBound(int port)
     Tcl_HashEntry  *hPtr;
 
     Ns_MutexLock(&lock);
-    hPtr = Tcl_FindHashEntry(&portsTable, (char *) port);
+    hPtr = Tcl_FindHashEntry(&portsTable, INT2PTR(port));
     Ns_MutexUnlock(&lock);
     return (hPtr != NULL ? 1 : 0);
 }
@@ -204,14 +203,14 @@ Ns_SockPortBound(int port)
  *
  * ListenProc --
  *
- *	This is a wrapper callback that runs the user's callback iff 
- *	a valid socket exists. 
+ *	This is a wrapper callback that runs the user's callback iff
+ *	a valid socket exists.
  *
  * Results:
- *	NS_TRUE or NS_FALSE 
+ *	NS_TRUE or NS_FALSE
  *
  * Side effects:
- *	May close the socket if no user context can be found. 
+ *	May close the socket if no user context can be found.
  *
  *----------------------------------------------------------------------
  */
@@ -220,7 +219,7 @@ static int
 ListenProc(SOCKET sock, void *arg, int why)
 {
     struct sockaddr_in  sa;
-    int                 len;
+    size_t              len;
     Tcl_HashTable      *tablePtr;
     Tcl_HashEntry      *hPtr;
     SOCKET              new;
@@ -235,12 +234,12 @@ ListenProc(SOCKET sock, void *arg, int why)
     if (new != INVALID_SOCKET) {
         Ns_SockSetBlocking(new);
         len = sizeof(sa);
-        getsockname(new, (struct sockaddr *) &sa, &len);
+        getsockname(new, (struct sockaddr *)&sa, (socklen_t *)&len);
         ldPtr = NULL;
         Ns_MutexLock(&lock);
-        hPtr = Tcl_FindHashEntry(tablePtr, (char *) sa.sin_addr.s_addr);
+        hPtr = Tcl_FindHashEntry(tablePtr, INT2PTR(sa.sin_addr.s_addr));
         if (hPtr == NULL) {
-            hPtr = Tcl_FindHashEntry(tablePtr, (char *) INADDR_ANY);
+            hPtr = Tcl_FindHashEntry(tablePtr, INT2PTR(INADDR_ANY));
         }
         if (hPtr != NULL) {
             ldPtr = Tcl_GetHashValue(hPtr);

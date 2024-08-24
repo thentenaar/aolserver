@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * tclinit.c --
  *
  *	Initialization and resource management routines for Tcl.  This
@@ -110,7 +110,7 @@ typedef struct TclTrace {
     struct TclTrace	 *prevPtr;
     struct TclTrace	 *nextPtr;
     Ns_TclTraceProc      *proc;
-    void		 *arg;  
+    void		 *arg;
     int			  when;
 } TclTrace;
 
@@ -307,7 +307,7 @@ Nsd_Init(Tcl_Interp *interp)
  *	Execute a Tcl script in the context of the the given server.
  *
  * Results:
- *	Tcl return code. 
+ *	Tcl return code.
  *
  * Side effects:
  *	String results or error are placed in dsPtr if not NULL.
@@ -476,10 +476,10 @@ Ns_FreeConnInterp(Ns_Conn *conn)
  *	Get the Ns_Conn structure associated with this tcl interp.
  *
  * Results:
- *	An Ns_Conn. 
+ *	An Ns_Conn.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -543,7 +543,7 @@ void
 Ns_TclMarkForDelete(Tcl_Interp *interp)
 {
     NsInterp *itPtr = NsGetInterpData(interp);
-    
+
     if (itPtr != NULL) {
 	itPtr->delete = 1;
     }
@@ -565,7 +565,7 @@ Ns_TclMarkForDelete(Tcl_Interp *interp)
  *
  *----------------------------------------------------------------------
  */
- 
+
 int
 Ns_TclRegisterTrace(char *server, Ns_TclTraceProc *proc, void *arg, int when)
 {
@@ -717,13 +717,13 @@ Ns_TclRegisterDeferred(Tcl_Interp *interp, Ns_TclDeferProc *proc, void *arg)
  *
  * Ns_TclLibrary --
  *
- *	Return the name of the private tcl lib 
+ *	Return the name of the private tcl lib
  *
  * Results:
- *	Tcl lib name. 
+ *	Tcl lib name.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -742,13 +742,13 @@ Ns_TclLibrary(char *server)
  *
  * Ns_TclInterpServer --
  *
- *	Return the name of the server. 
+ *	Return the name of the server.
  *
  * Results:
- *	Server name. 
+ *	Server name.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -757,7 +757,7 @@ char *
 Ns_TclInterpServer(Tcl_Interp *interp)
 {
     NsInterp *itPtr = NsGetInterpData(interp);
-    
+
     return (itPtr ? itPtr->servPtr->server : NULL);
 }
 
@@ -767,13 +767,13 @@ Ns_TclInterpServer(Tcl_Interp *interp)
  *
  * Ns_TclLogError --
  *
- *	Log the global errorInfo variable to the server log. 
+ *	Log the global errorInfo variable to the server log.
  *
  * Results:
- *	Returns a pointer to the errorInfo. 
+ *	Returns a pointer to the errorInfo.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -797,14 +797,14 @@ Ns_TclLogError(Tcl_Interp *interp)
  *
  * Ns_TclLogErrorRequest --
  *
- *	Log both errorInfo and info about the HTTP request that led 
- *	to it. 
+ *	Log both errorInfo and info about the HTTP request that led
+ *	to it.
  *
  * Results:
- *	Returns a pointer to the errorInfo. 
+ *	Returns a pointer to the errorInfo.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -824,7 +824,7 @@ Ns_TclLogErrorRequest(Tcl_Interp *interp, Ns_Conn *conn)
 	agent = "?";
     }
     Ns_Log(Error, "error for %s %s, "
-           "User-Agent: %s, PeerAddress: %s\n%s", 
+           "User-Agent: %s, PeerAddress: %s\n%s",
            conn->request->method, conn->request->url,
 	   agent, Ns_ConnPeer(conn), errorInfo);
     return (char*)errorInfo;
@@ -936,7 +936,7 @@ NsTclICtlObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
     enum {
 	IAddModuleIdx, ICleanupIdx, IEpochIdx, IGetIdx, IGetModulesIdx,
 	ISaveIdx, IUpdateIdx, IOnCreateIdx, IOnCleanupIdx, IOnInitIdx,
-        IOnDeleteIdx, ITraceIdx, IThreadsIdx, ICancelIdx, IRunIdx, 
+        IOnDeleteIdx, ITraceIdx, IThreadsIdx, ICancelIdx, IRunIdx,
 	IGetTracesIdx, IPackageIdx, IOnceIdx
     } opt;
     static CONST char *popts[] = {
@@ -1022,7 +1022,7 @@ NsTclICtlObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	Tcl_SetIntObj(Tcl_GetObjResult(interp), servPtr->tcl.epoch);
 	Ns_RWLockUnlock(&servPtr->tcl.slock);
 	break;
-   
+
     case ISaveIdx:
 	/*
 	 * Save the init script.
@@ -1268,7 +1268,7 @@ badargs:
 	Ns_MutexLock(&tlock);
 	hPtr = Tcl_FirstHashEntry(&threads, &search);
 	while (hPtr != NULL) {
-	    tid = (int) Tcl_GetHashKey(&threads, hPtr);
+	    tid = PTR2INT(Tcl_GetHashKey(&threads, hPtr));
 	    objPtr = Tcl_NewIntObj(tid);
 	    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 	    hPtr = Tcl_NextHashEntry(&search);
@@ -1286,7 +1286,7 @@ badargs:
 	    return TCL_ERROR;
 	}
 	Ns_MutexLock(&tlock);
-	hPtr = Tcl_FindHashEntry(&threads, (char *) tid);
+	hPtr = Tcl_FindHashEntry(&threads, INT2PTR(tid));
 	if (hPtr != NULL) {
 	    dataPtr = Tcl_GetHashValue(hPtr);
 	    Tcl_AsyncMark(dataPtr->cancel);
@@ -1308,10 +1308,10 @@ badargs:
  *
  * NsTclAtCloseObjCmd --
  *
- *	Implements ns_atclose. 
+ *	Implements ns_atclose.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
  *	Script will be invoked when the connection is closed.  Note
@@ -1349,13 +1349,13 @@ NsTclAtCloseObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
  *
  * NsTclMarkForDeleteObjCmd --
  *
- *	Implements ns_markfordelete. 
+ *	Implements ns_markfordelete.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See Ns_TclMarkForDelete. 
+ *	See Ns_TclMarkForDelete.
  *
  *----------------------------------------------------------------------
  */
@@ -1468,10 +1468,10 @@ NsFreeConnInterp(Conn *connPtr)
  *
  * NsTclRunAtClose --
  *
- *	Run any registered connection at-close scripts. 
+ *	Run any registered connection at-close scripts.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	None.
@@ -1764,8 +1764,8 @@ InitData(Tcl_Interp *interp, NsServer *servPtr)
     itPtr->interp = interp;
     itPtr->servPtr = servPtr;
     Tcl_InitHashTable(&itPtr->sets, TCL_STRING_KEYS);
-    Tcl_InitHashTable(&itPtr->chans, TCL_STRING_KEYS);	
-    Tcl_InitHashTable(&itPtr->https, TCL_STRING_KEYS);	
+    Tcl_InitHashTable(&itPtr->chans, TCL_STRING_KEYS);
+    Tcl_InitHashTable(&itPtr->https, TCL_STRING_KEYS);
     NsAdpInit(itPtr);
     itPtr->adp.cwd = Ns_PageRoot(servPtr->server);
 
@@ -1850,7 +1850,7 @@ GetData(void)
 	Tcl_InitHashTable(&dataPtr->interps, TCL_ONE_WORD_KEYS);
 	tid = Ns_ThreadId();
 	Ns_MutexLock(&tlock);
-	dataPtr->hPtr = Tcl_CreateHashEntry(&threads, (char *) tid, &new);
+	dataPtr->hPtr = Tcl_CreateHashEntry(&threads, INT2PTR(tid), &new);
 	Tcl_SetHashValue(dataPtr->hPtr, dataPtr);
 	Ns_MutexUnlock(&tlock);
 	Ns_TlsSet(&tls, dataPtr);
@@ -1915,7 +1915,7 @@ DeleteData(void *arg)
  *
  *----------------------------------------------------------------------
  */
- 
+
 static void
 RunTraces(NsInterp *itPtr, int why)
 {
@@ -1995,7 +1995,7 @@ ForeachTrace(NsInterp *itPtr, int why, int append)
  *
  *----------------------------------------------------------------------
  */
- 
+
 static void
 DoTrace(Tcl_Interp *interp, TclTrace *tracePtr, int append)
 {

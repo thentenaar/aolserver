@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -54,10 +54,10 @@ typedef struct Mod {
 
 static Ns_ThreadProc EvalThread;
 
-/* 
+/*
  * The following structure is allocated for each session.
  */
- 
+
 typedef struct Sess {
     Mod *modPtr;
     char *user;
@@ -109,7 +109,7 @@ static unsigned char wont_echo[]  = {TN_IAC, TN_WONT, TN_ECHO};
  *
  *----------------------------------------------------------------------
  */
- 
+
 int
 NsCp_ModInit(char *server, char *module)
 {
@@ -120,7 +120,7 @@ NsCp_ModInit(char *server, char *module)
     Ns_Set *set;
     Tcl_HashEntry *hPtr;
 
-    /* 
+    /*
      * Create the listening socket and callback.
      */
 
@@ -305,7 +305,7 @@ EvalThread(void *arg)
     /*
      * Initialize the thread and login the user.
      */
-     
+
     interp = NULL;
     Tcl_DStringInit(&ds);
     Tcl_DStringInit(&unameDS);
@@ -362,7 +362,7 @@ retry:
 	    Ns_TclLogError(interp);
 	}
 	Tcl_AppendResult(interp, "\r\n", NULL);
-        res = Tcl_GetStringResult(interp); 
+        res = Tcl_GetStringResult(interp);
 	len = strlen(res);
 	while (len > 0) {
 	    if ((n = send(sessPtr->sock, res, len, 0)) <= 0) goto done;
@@ -443,7 +443,7 @@ GetLine(SOCKET sock, char *prompt, Tcl_DString *dsPtr, int echo)
 	    result = 0;
 	    goto bail;
 	}
-	
+
 	/*
 	 * Deal with telnet IAC commands in some sane way.
 	 */
@@ -473,7 +473,7 @@ GetLine(SOCKET sock, char *prompt, Tcl_DString *dsPtr, int echo)
 	    }
 	}
 
-	Tcl_DStringAppend(dsPtr, buf, n);
+	Tcl_DStringAppend(dsPtr, (void *)buf, n);
 	result = 1;
 
     } while (buf[n-1] != '\n');

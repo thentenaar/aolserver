@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -31,7 +31,7 @@
 /*
  * tclthread.c --
  *
- *	Tcl wrappers around all thread objects 
+ *	Tcl wrappers around all thread objects
  */
 
 
@@ -103,13 +103,13 @@ NsTclInitAddrType(void)
  *
  * NsTclMutexObjCmd --
  *
- *	Implements ns_mutex as obj command. 
+ *	Implements ns_mutex as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -156,13 +156,13 @@ NsTclMutexObjCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
  *
  * NsTclCritSecObjCmd --
  *
- *	Implements ns_critsec. 
+ *	Implements ns_critsec.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See doc. 
+ *	See doc.
  *
  *----------------------------------------------------------------------
  */
@@ -207,13 +207,13 @@ NsTclCritSecObjCmd(ClientData data, Tcl_Interp *interp, int objc,
  *
  * NsTclSemaObjCmd --
  *
- *	Implements ns_sema. 
+ *	Implements ns_sema.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -272,7 +272,7 @@ NsTclSemaObjCmd(ClientData data, Tcl_Interp *interp, int objc,
  *	Implements ns_cond and ns_event.
  *
  * Results:
- *	See docs. 
+ *	See docs.
  *
  * Side effects:
  *	See docs.
@@ -370,13 +370,13 @@ NsTclCondObjCmd(ClientData data, Tcl_Interp *interp, int objc,
  *
  * NsTclRWLockObjCmd --
  *
- *	Implements ns_rwlock. 
+ *	Implements ns_rwlock.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -436,7 +436,7 @@ NsTclRWLockObjCmd(ClientData data, Tcl_Interp *interp, int objc,
  *	if any.
  *
  * Results:
- *	Standard Tcl result. 
+ *	Standard Tcl result.
  *
  * Side effects:
  *	May create a new thread or wait for an existing thread to exit.
@@ -555,13 +555,13 @@ SetAddrResult(Tcl_Interp *interp, int type, void *addr)
  *
  * Ns_TclThread --
  *
- *	Run a Tcl script in a new thread. 
+ *	Run a Tcl script in a new thread.
  *
  * Results:
- *	NS_OK. 
+ *	NS_OK.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -581,13 +581,13 @@ Ns_TclThread(Tcl_Interp *interp, char *script, Ns_Thread *thrPtr)
  *
  * Ns_TclDetachedThread --
  *
- *	Run a Tcl script in a detached thread. 
+ *	Run a Tcl script in a detached thread.
  *
  * Results:
- *	NS_OK. 
+ *	NS_OK.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -681,7 +681,7 @@ NsTclThread(void *arg)
  *	Proc info routine to copy Tcl thread script.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	Will copy script to given dstring.
@@ -753,7 +753,7 @@ GetAddrFromObj(Tcl_Interp *interp, Tcl_Obj *objPtr, int type, void **addrPtr)
     if (Tcl_ConvertToType(interp, objPtr, &addrType) != TCL_OK) {
 	return TCL_ERROR;
     }
-    if ((int) objPtr->internalRep.twoPtrValue.ptr1 != type) {
+    if (PTR2INT(objPtr->internalRep.twoPtrValue.ptr1) != type) {
 	Tcl_AppendResult(interp, "incorrect type: ", Tcl_GetString(objPtr), NULL);
 	return TCL_ERROR;
     }
@@ -769,7 +769,7 @@ GetAddrFromObj(Tcl_Interp *interp, Tcl_Obj *objPtr, int type, void **addrPtr)
  *
  *	Update the string representation for an address object.
  *	Note: This procedure does not free an existing old string rep
- *	so storage will be lost if this has not already been done. 
+ *	so storage will be lost if this has not already been done.
  *
  * Results:
  *	None.
@@ -785,7 +785,7 @@ static void
 UpdateStringOfAddr(objPtr)
     register Tcl_Obj *objPtr;	/* Int object whose string rep to update. */
 {
-    int type = (int) objPtr->internalRep.twoPtrValue.ptr1;
+    int type = PTR2INT(objPtr->internalRep.twoPtrValue.ptr1);
     void *addr = objPtr->internalRep.twoPtrValue.ptr2;
     char buf[40];
     size_t len;
@@ -811,7 +811,7 @@ UpdateStringOfAddr(objPtr)
  *
  * Side effects:
  *	If no error occurs, an int is stored as "objPtr"s internal
- *	representation. 
+ *	representation.
  *
  *----------------------------------------------------------------------
  */
@@ -856,13 +856,13 @@ SetAddrFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr)
 static void
 SetAddrInternalRep(Tcl_Obj *objPtr, int type, void *addr)
 {
-    Tcl_ObjType *typePtr = objPtr->typePtr;
+    const Tcl_ObjType *typePtr = objPtr->typePtr;
 
     if (typePtr != NULL && typePtr->freeIntRepProc != NULL) {
 	(*typePtr->freeIntRepProc)(objPtr);
     }
     objPtr->typePtr = &addrType;
-    objPtr->internalRep.twoPtrValue.ptr1 = (void *) type;
+    objPtr->internalRep.twoPtrValue.ptr1 = INT2PTR(type);
     objPtr->internalRep.twoPtrValue.ptr2 = addr;
     Tcl_InvalidateStringRep(objPtr);
 }

@@ -563,7 +563,6 @@ ConnRun(Conn *connPtr)
 {
     Tcl_Encoding    encoding = NULL;
     Ns_Conn 	  *conn = (Ns_Conn *) connPtr;
-    NsServer	  *servPtr = connPtr->servPtr;
     int		   i, status;
 
     /*

@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -144,7 +144,8 @@ Ns_TclGetTimeFromObj(Tcl_Interp *interp, Tcl_Obj *objPtr, Ns_Time *timePtr)
 	if (Tcl_ConvertToType(interp, objPtr, &timeType) != TCL_OK) {
 	    return TCL_ERROR;
         }
-    	*timePtr = *((Ns_Time *) &objPtr->internalRep);
+
+        memcpy(timePtr, &objPtr->internalRep, sizeof *timePtr);
     }
     return TCL_OK;
 }
@@ -157,7 +158,7 @@ Ns_TclGetTimeFromObj(Tcl_Interp *interp, Tcl_Obj *objPtr, Ns_Time *timePtr)
  *
  *	Update the string representation for an Ns_Time object.
  *	Note: This procedure does not free an existing old string rep
- *	so storage will be lost if this has not already been done. 
+ *	so storage will be lost if this has not already been done.
  *
  * Results:
  *	None.
@@ -203,7 +204,7 @@ UpdateStringOfTime(objPtr)
  *
  * Side effects:
  *	If no error occurs, an int is stored as "objPtr"s internal
- *	representation. 
+ *	representation.
  *
  *----------------------------------------------------------------------
  */
@@ -251,13 +252,13 @@ SetTimeFromAny(Tcl_Interp *interp, Tcl_Obj *objPtr)
 static void
 SetTimeInternalRep(Tcl_Obj *objPtr, Ns_Time *timePtr)
 {
-    Tcl_ObjType *typePtr = objPtr->typePtr;
+    const Tcl_ObjType *typePtr = objPtr->typePtr;
 
     if (typePtr != NULL && typePtr->freeIntRepProc != NULL) {
 	(*typePtr->freeIntRepProc)(objPtr);
     }
     objPtr->typePtr = &timeType;
-    *((Ns_Time *) &objPtr->internalRep) = *timePtr;
+    memcpy(&objPtr->internalRep, timePtr, sizeof *timePtr);
     Tcl_InvalidateStringRep(objPtr);
     objPtr->length = 0;  /* ensure there's no stumbling */
 }

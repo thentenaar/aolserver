@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -168,7 +168,7 @@ Ns_WaitForProcess(int pid, int *exitcodePtr)
 #else
     char *coredump;
     int exitcode, status;
-    
+
     if (waitpid(pid, &status, 0) != pid) {
         Ns_Log(Error, "waitpid(%d) failed: %s", pid, strerror(errno));
 	return NS_ERROR;
@@ -372,7 +372,7 @@ Ns_ExecArgv(char *exec, char *dir, int fdin, int fdout,
     /*
      * Win32 ExecArgv simply calls ExecArgblk.
      */
-    int             pid;     
+    int             pid;
     Ns_DString      ads;
     char	   *args;
     int		    i;
@@ -393,7 +393,7 @@ Ns_ExecArgv(char *exec, char *dir, int fdin, int fdout,
     Ns_DString eds;
     char *argvSh[4], **envp;
     int i, pid;
-    
+
     if (exec == NULL) {
         return -1;
     }
@@ -433,7 +433,7 @@ Ns_ExecArgv(char *exec, char *dir, int fdin, int fdout,
 
 /*
  *----------------------------------------------------------------------
- * ExecProc -- 
+ * ExecProc --
  *
  *	Execute a new process.  This code is careful to capture the
  *  	full error status from the child on failure.
@@ -457,7 +457,7 @@ ExecProc(char *exec, char *dir, int fdin, int fdout, char **argv,
     /*
      * Create a pipe for child error message.
      */
-     
+
     if (ns_pipe(errpipe) < 0) {
         Ns_Log(Error, "exec: ns_pipe() failed: %s", strerror(errno));
 	return -1;
@@ -474,8 +474,8 @@ ExecProc(char *exec, char *dir, int fdin, int fdout, char **argv,
         Ns_Log(Error, "exec: ns_fork() failed: %s", strerror(errno));
 	return -1;
     }
-    iov[0].iov_base = (caddr_t) &result;
-    iov[1].iov_base = (caddr_t) &errnum;
+    iov[0].iov_base = (char *)&result;
+    iov[1].iov_base = (char *)&errnum;
     iov[0].iov_len = iov[1].iov_len = sizeof(int);
     if (pid == 0) {
 
@@ -510,9 +510,9 @@ ExecProc(char *exec, char *dir, int fdin, int fdout, char **argv,
 	errnum = errno;
 	(void) writev(errpipe[1], iov, 2);
 	_exit(1);
-	
+
     } else {
-    
+
 	/*
 	 * Read result and errno from the child if any.
 	 */
@@ -565,7 +565,7 @@ ExecProc(char *exec, char *dir, int fdin, int fdout, char **argv,
  * Set2Argv --
  *
  *      Convert an Ns_Set containing key-value pairs into a character
- *	array containing a sequence of name-value pairs with their 
+ *	array containing a sequence of name-value pairs with their
  *	terminating null bytes.
  *
  * Results:

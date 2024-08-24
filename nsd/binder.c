@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * binder.c --
  *
  *Support for pre-bound privileged ports.
@@ -71,7 +71,7 @@ NsSockGetBound(struct sockaddr_in *saPtr)
     Ns_MutexLock(&lock);
     hPtr = Tcl_FindHashEntry(&prebound, (char *) saPtr);
     if (hPtr != NULL) {
-	sock = (int) Tcl_GetHashValue(hPtr);
+	sock = (SOCKET)(long)Tcl_GetHashValue(hPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     Ns_MutexUnlock(&lock);
@@ -168,7 +168,7 @@ NsClosePreBound(void)
 	saPtr = (struct sockaddr_in *) Tcl_GetHashKey(&prebound, hPtr);
 	addr = ns_inet_ntoa(saPtr->sin_addr);
 	port = htons(saPtr->sin_port);
-	sock = (int) Tcl_GetHashValue(hPtr);
+	sock = (int)(long)Tcl_GetHashValue(hPtr);
 	Ns_Log(Warning, "prebind: closed unused: %s:%d = %d", addr, port, sock);
 	close(sock);
 	hPtr = Tcl_NextHashEntry(&search);
@@ -190,8 +190,8 @@ NsClosePreBound(void)
  *	None.
  *
  * Side effects:
- *	Sockets are left in bound state for later listen 
- *	in Ns_SockListen.  
+ *	Sockets are left in bound state for later listen
+ *	in Ns_SockListen.
  *
  *----------------------------------------------------------------------
  */

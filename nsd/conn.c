@@ -1169,7 +1169,7 @@ NsTclConnObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	    fd = Ns_ConnContentFd(conn);
 	    if (fd >= 0 && (fd = dup(fd)) >= 0) {
 		/* NB: Dup the fd so the channel can be safely closed later. */
-		chan = Tcl_MakeFileChannel((ClientData) fd, TCL_READABLE);
+		chan = Tcl_MakeFileChannel((ClientData)INT2PTR(fd), TCL_READABLE);
 	 	if (chan == NULL) {
 		    close(fd);
 		} else {
@@ -1711,7 +1711,7 @@ MakeConnChannel(Ns_Conn *conn, int spliceout)
      * Wrap a Tcl TCP channel arround the socket.
      */
 
-    chan = Tcl_MakeTcpClientChannel((ClientData)sock);
+    chan = Tcl_MakeTcpClientChannel((ClientData)INT2PTR(sock));
     if (chan == NULL && spliceout) {
         connPtr->sockPtr->sock = sock;
     }

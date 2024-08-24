@@ -11,7 +11,7 @@
  *
  * The Original Code is ArsDigita code and related documentation
  * distributed by ArsDigita.
- * 
+ *
  * The Initial Developer of the Original Code is ArsDigita.,
  * Portions created by ArsDigita are Copyright (C) 1999 ArsDigita.
  * All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * tclcache.c --
  *
  *	Tcl API for cache.c.  Based on work from the nscache module.
@@ -144,7 +144,7 @@ int
 NsTclCacheObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 {
     static CONST char *opts[] = {
-	"create", "names", "eval", "set", "get", "incr", 
+	"create", "names", "eval", "set", "get", "incr",
 	"append", "lappend", "flush", NULL
     };
     enum {
@@ -152,7 +152,7 @@ NsTclCacheObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	CAppendIdx, CLappendIdx, CFlushIdx
     } opt;
     TclCache *cachePtr;
-    Val *valPtr;
+    Val *valPtr = NULL;
     int i, cur, err, new, status;
     char *key, *pattern, *var;
     Ns_Entry *entry;
@@ -220,7 +220,7 @@ NsTclCacheObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 	}
 	Ns_CacheUnlock(cachePtr->cache);
 	break;
-		
+
     case CFlushIdx:
 	/*
 	 * Flush one or more entries from the cache.
@@ -517,7 +517,7 @@ CreateCacheObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
 		return TCL_ERROR;
 	    }
 	    if (size < 0) {
-		Tcl_AppendResult(interp, "invalid size: ", 
+		Tcl_AppendResult(interp, "invalid size: ",
 				 Tcl_GetString(objv[i+1]), NULL);
 		return TCL_ERROR;
 	    }

@@ -11,7 +11,7 @@
 #
 # The Original Code is AOLserver Code and related documentation
 # distributed by AOL.
-# 
+#
 # The Initial Developer of the Original Code is America Online,
 # Inc. Portions created by AOL are Copyright (C) 1999 America Online,
 # Inc. All Rights Reserved.
@@ -25,14 +25,14 @@
 # replace them with the notice and other provisions required by the GPL.
 # If you do not delete the provisions above, a recipient may use your
 # version of this file under either the License or the GPL.
-# 
+#
 #
 # $Header: /Users/dossy/Desktop/cvs/aolserver/Makefile,v 1.64 2006/06/27 17:00:55 jgdavidson Exp $
 #
 #
 
-bins=nsthread nsd nstclsh 
-mods=nsdb nssock nslog nsperm nscgi nscp
+bins=nsthread nsd nstclsh
+mods=nsdb nssock nslog nsperm nscgi nscp nszlib
 dirs=$(bins) $(mods)
 
 SRCDIR=.

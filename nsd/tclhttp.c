@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -70,7 +70,7 @@ static Ns_TaskProc HttpProc;
 /*
  * Static variables defined in this file.
  */
- 
+
 static Ns_TaskQueue *queue;
 
 
@@ -289,7 +289,7 @@ HttpWaitCmd(NsInterp *itPtr, int objc, Tcl_Obj **objv)
     Tcl_Obj *responsePtr;
     Ns_Set *hdrs = NULL;
     Ns_Time diff;
-    char *arg, *content;
+    char *arg;
     Http *httpPtr;
     int result = TCL_ERROR;
     int i, status;
@@ -356,7 +356,7 @@ HttpWaitCmd(NsInterp *itPtr, int objc, Tcl_Obj **objv)
 	Tcl_AppendResult(interp, "http failed: ", httpPtr->error, NULL);
 	goto err;
     }
-    content = HttpResult(httpPtr->ds, &status, hdrs, &responsePtr);
+    HttpResult(httpPtr->ds, &status, hdrs, &responsePtr);
     if (statusPtr != NULL &&
 		!SetWaitVar(interp, statusPtr, Tcl_NewIntObj(status))) {
 	goto err;
@@ -518,7 +518,7 @@ HttpConnect(Tcl_Interp *interp, char *method, char *url, Ns_Set *hdrs,
         }
 	    body = NULL;
 	    if (bodyPtr != NULL) {
-	        body = Tcl_GetByteArrayFromObj(bodyPtr, &len);
+	        body = (char *)Tcl_GetByteArrayFromObj(bodyPtr, &len);
 	        if (len == 0) {
 		        body = NULL;
 	        }
@@ -582,9 +582,8 @@ HttpResult(Tcl_DString ds, int *statusPtr, Ns_Set *hdrs, Tcl_Obj **objPtrPtr)
 	        eoh += 1;
         }
     }
-    
-    *objPtrPtr = Tcl_NewByteArrayObj(body, ds.length-(body-response));
 
+    *objPtrPtr = Tcl_NewByteArrayObj((const unsigned char *)body, ds.length-(body-response));
     if (eoh == NULL) {
 	    *statusPtr = 0;
     } else {
@@ -719,7 +718,7 @@ HttpProc(Ns_Task *task, SOCKET sock, void *arg, int why)
     /*
      * Get completion time and mark task as done.
      */
-     
+
     Ns_GetTime(&httpPtr->etime);
     Ns_TaskDone(httpPtr->task);
 }

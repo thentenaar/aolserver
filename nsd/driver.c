@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * driver.c --
  *
  *	Connection I/O for loadable socket drivers.
@@ -128,7 +128,7 @@ typedef struct PollData {
 
 typedef struct ServerMap {
     NsServer *servPtr;
-    char location[8];	/* Location starting with http://. */ 
+    char location[8];	/* Location starting with http://. */
 } ServerMap;
 
 /*
@@ -239,7 +239,7 @@ Ns_DriverInit(char *server, char *module, Ns_DriverInitData *init)
     NsServer *servPtr = NULL;
 
     if (init->version != NS_DRIVER_VERSION_1) {
-        Ns_Log(Error, "%s: version field of init argument is invalid: %d", 
+        Ns_Log(Error, "%s: version field of init argument is invalid: %d",
                 module, init->version);
         return NS_ERROR;
     }
@@ -305,7 +305,7 @@ Ns_DriverInit(char *server, char *module, Ns_DriverInitData *init)
 	/*
 	 * Finally, if no hostname was specified, set it to the hostname
 	 * derived from the lookup(s) above.
-	 */ 
+	 */
 
 	if (host == NULL) {
 	    host = he->h_name;
@@ -356,7 +356,7 @@ Ns_DriverInit(char *server, char *module, Ns_DriverInitData *init)
     if (Ns_ConfigGetBool(path, "debug", &n) && n) {
 	drvPtr->flags |= DRIVER_DEBUG;
     }
-    if (!Ns_ConfigGetInt(path, "bufsize", &n) || n < 1) { 
+    if (!Ns_ConfigGetInt(path, "bufsize", &n) || n < 1) {
         n = 16000; 	/* ~16k */
     }
     drvPtr->bufsize = _MAX(n, 1024);
@@ -422,7 +422,7 @@ Ns_DriverInit(char *server, char *module, Ns_DriverInitData *init)
     /*
      * Pre-allocate Sock structures.
      */
-          
+
     drvPtr->freeSockPtr = NULL;
     sockPtr = ns_malloc(sizeof(Sock) * drvPtr->maxsock);
     for (n = 0; n < drvPtr->maxsock; ++n) {
@@ -529,10 +529,10 @@ Ns_RegisterDriver(char *server, char *label, void *procs, void *drvData)
  *	Return the driver's context (no longer supported)
  *
  * Results:
- *	NULL. 
+ *	NULL.
  *
  * Side effects:
- *	None 
+ *	None
  *
  *----------------------------------------------------------------------
  */
@@ -569,10 +569,8 @@ Ns_QueueWait(Ns_Conn *conn, SOCKET sock, Ns_QueueWaitProc *proc,
     	     void *arg, int when, Ns_Time *timePtr)
 {
     Conn *connPtr = (Conn *) conn;
-    QueWait *queWaitPtr; 
-    Driver *drvPtr;
+    QueWait *queWaitPtr;
 
-    drvPtr = Ns_TlsGet(&drvtls);
     if (connPtr->sockPtr == NULL || connPtr->sockPtr->drvPtr != Ns_TlsGet(&drvtls)) {
 	LogReadError(connPtr, E_QUEWAIT);
 	return NS_ERROR;
@@ -660,7 +658,7 @@ void
 NsStopDrivers(void)
 {
     Driver *drvPtr = firstDrvPtr;
-    
+
     while (drvPtr != NULL) {
 	Ns_MutexLock(&drvPtr->lock);
     	Ns_Log(Notice, "driver: stopping: %s", drvPtr->module);
@@ -794,9 +792,9 @@ NsTclDriverObjCmd(ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj **objv
     }
     return TCL_OK;
 }
-	
+
 
-/* 
+/*
  *----------------------------------------------------------------------
  *
  * NsConnSend --
@@ -826,7 +824,7 @@ NsConnSend(Ns_Conn *conn, struct iovec *bufs, int nbufs)
 }
 
 
-/* 
+/*
  *----------------------------------------------------------------------
  *
  * NsSockClose --
@@ -888,7 +886,7 @@ NsSockClose(Sock *sockPtr, int keep)
  *      Return a Conn structure to the free list after processing.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *      Will close Sock structure if still open.
@@ -919,11 +917,11 @@ NsFreeConn(Conn *connPtr)
  * DriverThread --
  *
  *      Main communication driver thread.  A driver thread is created
- *      for each loaded module.  The thread continuously loops 
+ *      for each loaded module.  The thread continuously loops
  *      handling I/O events, accepting new connections, and queuing
  *      connections for reader and execution threads.  The driver will
  *      also processes any pre-queue callbacks and resulting I/O events,
- *      if any. 
+ *      if any.
  *
  * Results:
  *	None.
@@ -954,11 +952,11 @@ DriverThread(void *arg)
 
     Ns_TlsSet(&drvtls, drvPtr);
     ThreadName(drvPtr, "driver");
-    
+
     /*
      * Create the listen socket.
      */
- 
+
     flags = DRIVER_STARTED;
     lsock = Ns_SockListenEx(drvPtr->bindaddr, drvPtr->port, drvPtr->backlog);
     if (lsock != INVALID_SOCKET) {
@@ -1164,7 +1162,7 @@ DriverThread(void *arg)
             case SOCK_RUNWAIT:
 		/* NB: Handled below when processing Conn queue. */
                 break;
-                    
+
 	    default:
 		Ns_Fatal("impossible state");
 		break;
@@ -1223,7 +1221,7 @@ DriverThread(void *arg)
             preqSockPtr = sockPtr->nextPtr;
             sockPtr->connPtr->times.ready = now;
 	    /*
-	     * Invoke any pre-queue filters 
+	     * Invoke any pre-queue filters
 	     */
 
 	    if (sockPtr->state == SOCK_PREQUE
@@ -1252,7 +1250,7 @@ DriverThread(void *arg)
 
         while ((sockPtr = queSockPtr) != NULL) {
             queSockPtr = sockPtr->nextPtr;
-	    connPtr = sockPtr->connPtr; 
+	    connPtr = sockPtr->connPtr;
 	    NsFreeConnInterp(connPtr);
 	    if (sockPtr->state == SOCK_ERROR) {
 		SockClose(sockPtr);
@@ -1376,8 +1374,8 @@ dropped:
 		    "id %u sock %d state %s idx %d events %d revents %d "
 		    "accept %ld:%ld timeout %ld:%ld",
 		    sockPtr->id, sockPtr->sock, states[sockPtr->state], sockPtr->pidx,
-		    pdata.pfds[sockPtr->pidx].events, 
-		    pdata.pfds[sockPtr->pidx].revents, 
+		    pdata.pfds[sockPtr->pidx].events,
+		    pdata.pfds[sockPtr->pidx].revents,
 		    sockPtr->acceptTime.sec, sockPtr->acceptTime.usec,
 		    sockPtr->timeout.sec, sockPtr->timeout.usec);
 		if (sockPtr->connPtr != NULL) {
@@ -1456,7 +1454,7 @@ Poll(PollData *pdataPtr, SOCKET sock, int events, Ns_Time *timeoutPtr)
     pdataPtr->pfds[pdataPtr->nfds].revents = 0;
     idx = pdataPtr->nfds++;
 
-    /* 
+    /*
      * Check for new minimum timeout.
      */
 
@@ -1640,7 +1638,7 @@ SockClose(Sock *sockPtr)
     /*
      * Free the Conn if the Sock is still responsible for it.
      */
-     
+
     if (sockPtr->connPtr != NULL) {
 	NsFreeConnInterp(sockPtr->connPtr);
         FreeConn(sockPtr->connPtr);
@@ -1886,11 +1884,11 @@ SockReadLine(Driver *drvPtr, Ns_Sock *sock, Conn *connPtr)
     }
 
     /*
-     * With the request and headers read, setup the connection.  First,  
+     * With the request and headers read, setup the connection.  First,
      * determine the virtual server and driver location, handling
      * Host: header based multi-server drivers.
      */
-    
+
     servPtr = connPtr->drvPtr->servPtr;
     if (servPtr != NULL) {
     	connPtr->location = connPtr->drvPtr->location;
@@ -1965,7 +1963,7 @@ SockReadLine(Driver *drvPtr, Ns_Sock *sock, Conn *connPtr)
     /*
      * Get limits and content length, checking for overflow.
      */
-     
+
     connPtr->limitsPtr = NsGetRequestLimits(connPtr->server,
             				    request->method, request->url);
     hdr = Ns_SetIGet(connPtr->headers, "content-length");
@@ -2153,7 +2151,7 @@ void
 NsConnSeek(Ns_Conn *conn, int count)
 {
     Conn *connPtr = (Conn *) conn;
-    
+
     connPtr->avail -= count;
     connPtr->next  += count;
 }
@@ -2173,7 +2171,7 @@ NsConnSeek(Ns_Conn *conn, int count)
  *
  * Side effects:
  *	Depends on callbacks which may, e.g., register more queue wait
- *      callbacks. 
+ *      callbacks.
  *
  *----------------------------------------------------------------------
  */
@@ -2226,10 +2224,10 @@ RunQueWaits(PollData *pdataPtr, Ns_Time *nowPtr, Sock *sockPtr)
  *
  * AllocConn --
  *
- *	Allocate a Conn structure and basic I/O related members. 
+ *	Allocate a Conn structure and basic I/O related members.
  *
  * Results:
- *	Pointer to new Conn. 
+ *	Pointer to new Conn.
  *
  * Side effects:
  *	None.
@@ -2243,7 +2241,7 @@ AllocConn(Driver *drvPtr, Ns_Time *nowPtr, Sock *sockPtr)
     static unsigned int nextid = 0;
     Conn *connPtr;
     int id;
-    
+
     Ns_MutexLock(&connlock);
     id = nextid++;
     connPtr = firstConnPtr;
@@ -2287,10 +2285,10 @@ AllocConn(Driver *drvPtr, Ns_Time *nowPtr, Sock *sockPtr)
  *	Free a Conn structure and members allocated by AllocConn.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -2389,10 +2387,10 @@ RunFilters(Conn *connPtr, int why)
  *	Thread main for blocking connection reads.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -2455,7 +2453,7 @@ ReaderThread(void *arg)
  *	Set name of driver or reader thread.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	Thread name will show up in log messages.
@@ -2502,65 +2500,65 @@ LogReadError(Conn *connPtr, ReadErr err)
 	return;
     }
     switch (err) {
-    case E_NOERROR:		
+    case E_NOERROR:
 	msg = "no error";
 	break;
-    case E_CLOSE:		
+    case E_CLOSE:
 	msg = "client close";
 	break;
-    case E_RECV:		
+    case E_RECV:
 	msg = "recv failed";
 	break;
-    case E_FDAGAIN:		
+    case E_FDAGAIN:
 	msg = "fd unavailable";
 	break;
-    case E_FDWRITE:		
+    case E_FDWRITE:
 	msg = "fd write failed";
 	break;
-    case E_FDTRUNC:		
+    case E_FDTRUNC:
 	msg = "fd truncate failed";
 	break;
-    case E_FDSEEK:		
+    case E_FDSEEK:
 	msg = "fd seek failed";
 	break;
-    case E_NOHOST:		
+    case E_NOHOST:
 	msg = "no host header";
 	break;
-    case E_NOSERV:		
+    case E_NOSERV:
 	msg = "no such host";
 	break;
-    case E_HINVAL:		
+    case E_HINVAL:
 	msg = "invalid header";
 	break;
-    case E_RINVAL:		
+    case E_RINVAL:
 	msg = "invalid request";
 	break;
-    case E_NINVAL:		
+    case E_NINVAL:
 	msg = "invalid content-length";
 	break;
-    case E_LRANGE:		
+    case E_LRANGE:
 	msg = "max line exceeded";
 	break;
-    case E_RRANGE:		
+    case E_RRANGE:
 	msg = "max request exceeded";
 	break;
-    case E_CRANGE:		
+    case E_CRANGE:
 	msg = "max content exceeded";
 	break;
-    case E_FILTER:		
+    case E_FILTER:
 	msg = "filter error or abort result";
 	break;
-    case E_QUEWAIT:		
+    case E_QUEWAIT:
 	msg = "attempt to register quewait outside driver thread";
 	break;
     default:
 	msg = "unknown error";
     }
     switch (err) {
-    case E_RECV:		
-    case E_FDWRITE:		
-    case E_FDTRUNC:		
-    case E_FDSEEK:		
+    case E_RECV:
+    case E_FDWRITE:
+    case E_FDTRUNC:
+    case E_FDSEEK:
 	fmt = "conn[%d]: %s: %s";
 	break;
     default:

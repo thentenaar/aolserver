@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * server.c --
  *
  *	Routines for managing NsServer structures.
@@ -37,7 +37,7 @@
 #include "nsd.h"
 
 /*
- * Static functions defined in this file. 
+ * Static functions defined in this file.
  */
 
 static void GetCharsetEncoding(char *path, char *key, char **charsetPtr,
@@ -48,7 +48,7 @@ static void RegisterMaps(char *server, char *type, Ns_OpProc *proc);
 static void RegisterMap(char *server, char *type, char *map, Ns_OpProc *proc);
 
 /*
- * Static variables defined in this file. 
+ * Static variables defined in this file.
  */
 
 static Tcl_HashTable servers;	/* Table of all virtual servers. */
@@ -243,7 +243,6 @@ CreateServer(char *server)
     Ns_DString ds;
     NsServer *servPtr;
     char *path, *spath, *dirf, *p;
-    Ns_Set *set;
     int i, n;
 
     Ns_DStringInit(&ds);
@@ -253,7 +252,7 @@ CreateServer(char *server)
     /*
      * Set some server options.
      */
-     
+
     spath = path = Ns_ConfigGetPath(server, NULL, NULL);
     servPtr->opts.flags = 0;
     servPtr->opts.realm = Ns_ConfigGetValue(path, "realm");
@@ -325,18 +324,18 @@ CreateServer(char *server)
     /*
      * Set some server limits.
      */
-     
+
     if (!Ns_ConfigGetInt(path, "errorminsize", &servPtr->limits.errorminsize)) {
     	servPtr->limits.errorminsize = 514;
     }
     if (!Ns_ConfigGetInt(path, "connsperthread", &servPtr->limits.connsperthread)) {
     	servPtr->limits.connsperthread = 0;	/* Unlimited */
     }
-    
+
     /*
      * Initialize Tcl module config support.
      */
-     
+
     Ns_MutexInit(&servPtr->tcl.llock);
     Ns_MutexSetName(&servPtr->tcl.llock, "ns:tcl.llock");
     Ns_CondInit(&servPtr->tcl.lcond);
@@ -365,7 +364,7 @@ CreateServer(char *server)
     /*
      * Initialize Tcl shared variables, sets, and channels interfaces.
      */
-     
+
     if (!Ns_ConfigGetInt(path, "nsvbuckets", &n) || n < 1) {
 	n = 8;
     }
@@ -384,7 +383,7 @@ CreateServer(char *server)
     /*
      * Initialize the fastpath.
      */
-     
+
     path = Ns_ConfigGetPath(server, NULL, "fastpath", NULL);
     if (!Ns_ConfigGetBool(path, "cache", &i) || i) {
     	if (!Ns_ConfigGetInt(path, "cachemaxsize", &n)) {
@@ -429,7 +428,7 @@ CreateServer(char *server)
     servPtr->fastpath.pageroot = Ns_ConfigGetValue(path, "pageroot");
     if (servPtr->fastpath.pageroot == NULL) {
     	servPtr->fastpath.pageroot = Ns_ConfigGetValue(spath, "pageroot");
-	if (servPtr->fastpath.pageroot == NULL) {    	
+	if (servPtr->fastpath.pageroot == NULL) {
 	    Ns_ModulePath(&ds, server, NULL, "pages", NULL);
 	    servPtr->fastpath.pageroot = Ns_DStringExport(&ds);
 	}
@@ -631,7 +630,7 @@ RegisterMap(char *server, char *type, char *map, Ns_OpProc *proc)
      * Split the map line which is either a single element for an
      * URL pattern or two elements, URL followed by time to live.
      */
- 
+
     if (Tcl_SplitList(NULL, map, &largc, &largv) == TCL_OK) {
 	skip = 0;
 	if (largc == 1) {

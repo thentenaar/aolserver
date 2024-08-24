@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -27,7 +27,7 @@
  * version of this file under either the License or the GPL.
  */
 
-/* 
+/*
  * thread.c --
  *
  *	Routines for creating, exiting, and joining threads.
@@ -49,7 +49,7 @@
  */
 
 typedef struct ThreadArg {
-    Ns_ThreadProc  *proc;	/* Thread startup routine. */ 
+    Ns_ThreadProc  *proc;	/* Thread startup routine. */
     void           *arg;	/* Argument to startup proc. */
     int		    flags;	/* Thread is detached. */
     char	    parent[NS_THREAD_NAMESIZE];
@@ -64,7 +64,7 @@ typedef struct Thread {
     struct Thread  *nextPtr;	/* Next in list of all threads. */
     Ns_Time	    ctime;	/* Thread structure create time. */
     int		    flags;	/* Detached, joined, etc. */
-    Ns_ThreadProc  *proc;	/* Thread startup routine. */ 
+    Ns_ThreadProc  *proc;	/* Thread startup routine. */
     void           *arg;	/* Argument to startup proc. */
     int		    tid;        /* Id set by thread for logging. */
     void	   *stackaddr;	/* Thread stack address. */
@@ -457,7 +457,7 @@ GetThread(void)
  *
  * CleanupThread --
  *
- *	TLS cleanup for the nsthread context. 
+ *	TLS cleanup for the nsthread context.
  *
  * Results:
  *	None.
@@ -508,7 +508,7 @@ int
 Ns_CheckStack(void)
 {
     Thread *thrPtr = GetThread();
-    caddr_t limit;
+    char *limit;
 
     /*
      * Return error on no stack.
@@ -523,13 +523,13 @@ Ns_CheckStack(void)
      */
 
     if (thrPtr->flags & FLAG_STACKDOWN) {
-	limit = (caddr_t) thrPtr->stackaddr - thrPtr->stacksize;
-	if ((caddr_t) &limit < limit) {
+	limit = (char *)thrPtr->stackaddr - thrPtr->stacksize;
+	if ((char *)&limit < limit) {
 	    return NS_BREAK;
 	}
     } else {
-	limit = (caddr_t) thrPtr->stackaddr + thrPtr->stacksize;
-	if ((caddr_t) &limit > limit) {
+	limit = (char *)thrPtr->stackaddr + thrPtr->stacksize;
+	if ((char *)&limit > limit) {
 	    return NS_BREAK;
 	}
     }

@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -87,7 +87,7 @@
 /*
  * Workaround until we have ENOTSUP in errno.h
  */
-#define ENOTSUP         EOPNOTSUPP    
+#define ENOTSUP         EOPNOTSUPP
 #endif
 #endif
 
@@ -149,6 +149,16 @@ NS_EXTERN int closedir(DIR *dp);
 #include <inttypes.h>
 #endif
 
+#if !defined(INT2PTR) && !defined(PTR2INT)
+#if defined(HAVE_INTPTR_T)
+#define INT2PTR(p) ((void *)(intptr_t)(p))
+#define PTR2INT(p) ((int)(intptr_t)(p))
+#else
+#define INT2PTR(p) ((void *)(long)(p))
+#define PTR2INT(p) ((int)(long)(p))
+#endif
+#endif
+
 /*
  * Various constants.
  */
@@ -166,7 +176,7 @@ NS_EXTERN int closedir(DIR *dp);
 /*
  * The following objects are defined as pointers to dummy structures
  * to ensure proper type checking.  The actual objects underlying
- * objects are platform specific. 
+ * objects are platform specific.
  */
 
 typedef struct Ns_Thread_	*Ns_Thread;

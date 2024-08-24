@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -241,7 +241,7 @@ NsEnableDNSCache(void)
  *	to ensure waiting on a condition and not mutex spin waiting.
  *
  * Results:
- *      If a name can be found, the function returns NS_TRUE; otherwise, 
+ *      If a name can be found, the function returns NS_TRUE; otherwise,
  *	it returns NS_FALSE.
  *
  * Side effects:
@@ -253,14 +253,13 @@ NsEnableDNSCache(void)
 static int
 GetHost(Ns_DString *dsPtr, char *addr)
 {
-#if defined(HAVE_GETNAMEINFO)
-    char buf[NI_MAXHOST];
+#if defined(HAVE_GETNAMEINFO) || defined(HAVE_GETHOSTBYADDR_R)
     int err;
-#elif defined(HAVE_GETHOSTBYADDR_R)
-    struct hostent he, *hp;
     char buf[2048];
-    int err;
-#else
+#endif
+#if defined(HAVE_GETHOSTBYADDR_R)
+    struct hostent he, *hp;
+#elif !defined(HAVE_GETNAMEINFO)
     struct hostent *hp;
     static Ns_Cs cs;
 #endif
@@ -325,7 +324,7 @@ GetAddr(Ns_DString *dsPtr, char *host)
     struct addrinfo *res, *ptr;
     int result;
     int status = NS_FALSE;
-    
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_INET;
     hints.ai_socktype = SOCK_STREAM;
@@ -360,7 +359,7 @@ GetAddr(Ns_DString *dsPtr, char *host)
     int i = 0;
     int h_errnop;
     int status = NS_FALSE;
-    
+
 #if defined(HAVE_GETHOSTBYNAME_R_6)
     result = gethostbyname_r(host, &he, buf, sizeof(buf), &res, &h_errnop);
 #elif defined(HAVE_GETHOSTBYNAME_R_5)
@@ -374,7 +373,7 @@ GetAddr(Ns_DString *dsPtr, char *host)
     h_errnop = h_errno;
 #endif
 
-    if (result != 0) { 
+    if (result != 0) {
 	DnsLogError("gethostbyname_r", h_errnop);
     } else {
         while ((ptr = (struct in_addr *) he.h_addr_list[i++]) != NULL) {

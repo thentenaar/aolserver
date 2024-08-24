@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -31,7 +31,7 @@
 /*
  * tclfile.c --
  *
- *	Tcl commands that do stuff to the filesystem. 
+ *	Tcl commands that do stuff to the filesystem.
  */
 
 
@@ -133,7 +133,7 @@ Ns_TclGetOpenFd(Tcl_Interp *interp, char *chanId, int write, int *fdPtr)
 			 chanId, NULL);
 	return TCL_ERROR;
     }
-    *fdPtr = (int) data;
+    *fdPtr = PTR2INT(data);
     return TCL_OK;
 }
 
@@ -143,13 +143,13 @@ Ns_TclGetOpenFd(Tcl_Interp *interp, char *chanId, int write, int *fdPtr)
  *
  * NsTclCpFpObjCmd --
  *
- *	Implements ns_cpfp as obj command. 
+ *	Implements ns_cpfp as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -177,13 +177,13 @@ NsTclCpFpObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
             return TCL_ERROR;
         }
         if (tocopy < 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "invalid length \"", 
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "invalid length \"",
                 Tcl_GetString(objv[3]),
 		        "\": must be >= 0", NULL);
             return TCL_ERROR;
         }
     }
-    
+
     ntotal = 0;
     while (tocopy != 0) {
 	toread = sizeof(buf);
@@ -224,13 +224,13 @@ NsTclCpFpObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
  *
  * NsTclCpObjCmd --
  *
- *	Implements ns_cp as obj command. 
+ *	Implements ns_cp as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -243,7 +243,7 @@ NsTclCpObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[
     int             preserve, result, rfd, wfd;
     struct stat     st;
     struct utimbuf  ut;
-    
+
     if (objc != 3 && objc != 4) {
 badargs:
         Tcl_WrongNumArgs(interp, 1, objv, "?-preserve? srcfile dstfile");
@@ -346,10 +346,10 @@ done:
  *	Implements ns_mkdir as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -362,7 +362,7 @@ NsTclMkdirObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
         return TCL_ERROR;
     }
     if (mkdir(Tcl_GetString(objv[1]), 0777) != 0) {
-       Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "mkdir (\"", 
+       Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "mkdir (\"",
 		Tcl_GetString(objv[1]),
 		"\") failed:  ", Tcl_PosixError(interp), NULL);
         return TCL_ERROR;
@@ -376,13 +376,13 @@ NsTclMkdirObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
  *
  * NsTclRmdirObjCmd --
  *
- *	Implements ns_rmdir 
+ *	Implements ns_rmdir
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -395,7 +395,7 @@ NsTclRmdirObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
         return TCL_ERROR;
     }
     if (rmdir(Tcl_GetString(objv[1])) != 0) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "rmdir (\"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "rmdir (\"",
 		Tcl_GetString(objv[1]),
 		"\") failed:  ", Tcl_PosixError(interp), NULL);
         return TCL_ERROR;
@@ -409,13 +409,13 @@ NsTclRmdirObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
  *
  * NsTclRollFileObjCmd --
  *
- *	Implements ns_rollfile obj command. 
+ *	Implements ns_rollfile obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -433,7 +433,7 @@ FileObjCmd(Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[], char *cmd)
 	return TCL_ERROR;
     }
     if (max <= 0 || max > 1000) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "invalid max \"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "invalid max \"",
 		Tcl_GetString(objv[2]),
 	        "\": should be > 0 and <= 1000.", NULL);
         return TCL_ERROR;
@@ -444,7 +444,7 @@ FileObjCmd(Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[], char *cmd)
 	status = Ns_RollFile(Tcl_GetString(objv[1]), max);
     }
     if (status != NS_OK) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "could not ", cmd, " \"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "could not ", cmd, " \"",
 		Tcl_GetString(objv[1]),
 	        "\": ", Tcl_PosixError(interp), NULL);
 	return TCL_ERROR;
@@ -470,13 +470,13 @@ NsTclPurgeFilesObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CON
  *
  * NsTclUnlinkObjCmd --
  *
- *	Implement ns_unlink as obj command. 
+ *	Implement ns_unlink as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -494,7 +494,7 @@ NsTclUnlinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
     if (objc == 3) {
 	if (!STREQ(Tcl_GetString(objv[1]), "-nocomplain")) {
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "unknown flag \"",
-		    Tcl_GetString(objv[1]), "\": should be -nocomplain", 
+		    Tcl_GetString(objv[1]), "\": should be -nocomplain",
 		    NULL);
 	    return TCL_ERROR;
 	} else {
@@ -504,7 +504,7 @@ NsTclUnlinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
 
     if (unlink(Tcl_GetString(objv[objc-1])) != 0) {
 	if (fComplain || errno != ENOENT) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "unlink (\"", 
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "unlink (\"",
 		    Tcl_GetString(objv[objc-1]),
 		    "\") failed:  ", Tcl_PosixError(interp), NULL);
 	    return TCL_ERROR;
@@ -520,10 +520,10 @@ NsTclUnlinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
  *
  * NsTclMkTempCmd --
  *
- *	Implements ns_mktemp. 
+ *	Implements ns_mktemp.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
  *	Allocates memory for the filename as a TCL_VOLATILE object.
@@ -553,13 +553,13 @@ NsTclMkTempCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv)
  *
  * NsTclTmpNamObjCmd --
  *
- *	Implements ns_tmpnam as obj command. 
+ *	Implements ns_tmpnam as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -593,7 +593,7 @@ NsTclTmpNamObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
     for (i = 0; i < strlen(buf); i++) {
         if (buf[i] == '\\') buf[i] = '/';
     }
-    /* 
+    /*
        The documentation says that _tempnam() allocates memory via
        malloc(); to be sure, that the "right" free() is used, we do
        not use TCL_DYNAMIC but the TCL_VOLATILE followed by the manual
@@ -619,13 +619,13 @@ NsTclTmpNamObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
  *
  * NsTclNormalizePathObjCmd --
  *
- *	Implements ns_normalizepath as obj command. 
+ *	Implements ns_normalizepath as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -643,7 +643,7 @@ NsTclNormalizePathObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *
     Ns_NormalizePath(&ds, Tcl_GetString(objv[1]));
     Tcl_SetResult(interp, ds.string, TCL_VOLATILE);
     Ns_DStringFree(&ds);
-    
+
     return TCL_OK;
 }
 
@@ -653,13 +653,13 @@ NsTclNormalizePathObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *
  *
  * NsTclUrl2FileObjCmd --
  *
- *	Implements ns_url2file as obj command. 
+ *	Implements ns_url2file as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -687,13 +687,13 @@ NsTclUrl2FileObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST
  *
  * NsTclKillObjCmd --
  *
- *	Implements ns_kill as obj command. 
+ *	Implements ns_kill as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -716,8 +716,8 @@ NsTclKillObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
             return TCL_ERROR;
         }
         if (kill(pid, signal) != 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "kill (\"", 
-                Tcl_GetString(objv[1]), ",", 
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "kill (\"",
+                Tcl_GetString(objv[1]), ",",
                 Tcl_GetString(objv[2]),
 			    "\") failed:  ", Tcl_PosixError(interp), NULL);
             return TCL_ERROR;
@@ -743,13 +743,13 @@ NsTclKillObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
  *
  * NsTclLinkObjCmd --
  *
- *	Implements ns_link as obj command. 
+ *	Implements ns_link as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -763,8 +763,8 @@ NsTclLinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
     }
     if (objc == 3) {
         if (link(Tcl_GetString(objv[1]), Tcl_GetString(objv[2])) != 0) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), 
-		    "link (\"", Tcl_GetString(objv[1]), "\", \"", 
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		    "link (\"", Tcl_GetString(objv[1]), "\", \"",
 		    Tcl_GetString(objv[2]),
 		    "\") failed:  ", Tcl_PosixError(interp), NULL);
             return TCL_ERROR;
@@ -786,13 +786,13 @@ NsTclLinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
  *
  * NsTclSymlinkObjCmd --
  *
- *	Implements ns_symlink as obj command. 
+ *	Implements ns_symlink as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -808,8 +808,8 @@ NsTclSymlinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST 
 
     if (objc == 3) {
         if (symlink(Tcl_GetString(objv[1]), Tcl_GetString(objv[2])) != 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "symlink (\"", 
-		    Tcl_GetString(objv[1]), "\", \"", 
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "symlink (\"",
+		    Tcl_GetString(objv[1]), "\", \"",
 		    Tcl_GetString(objv[2]),
 		    "\") failed:  ", Tcl_PosixError(interp), NULL);
             return TCL_ERROR;
@@ -830,13 +830,13 @@ NsTclSymlinkObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST 
  *
  * NsTclRenameObjCmd --
  *
- *	Implements ns_rename as obj command. 
+ *	Implements ns_rename as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -849,8 +849,8 @@ NsTclRenameObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
         return TCL_ERROR;
     }
     if (rename(Tcl_GetString(objv[1]), Tcl_GetString(objv[2])) != 0) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "rename (\"", 
-		Tcl_GetString(objv[1]), "\", \"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "rename (\"",
+		Tcl_GetString(objv[1]), "\", \"",
 		Tcl_GetString(objv[2]),
 		"\") failed:  ", Tcl_PosixError(interp), NULL);
         return TCL_ERROR;
@@ -864,13 +864,13 @@ NsTclRenameObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST o
  *
  * NsTclWriteFpObjCmd --
  *
- *	Implements ns_writefp as obj command. 
+ *	Implements ns_writefp as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -911,13 +911,13 @@ NsTclWriteFpObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST 
  *
  * NsTclTruncateObjCmd --
  *
- *	Implements ns_truncate as obj command. 
+ *	Implements ns_truncate as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -926,7 +926,7 @@ int
 NsTclTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int length;
-    
+
     if (objc != 2 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "file ?length?");
 	return TCL_ERROR;
@@ -939,7 +939,7 @@ NsTclTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST
     }
 
     if (truncate(Tcl_GetString(objv[1]), length) != 0) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "truncate (\"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "truncate (\"",
 		Tcl_GetString(objv[1]), "\", ",
 		Tcl_GetString(objv[2]) ? Tcl_GetString(objv[2]) : "0",
 		") failed:  ", Tcl_PosixError(interp), NULL);
@@ -955,13 +955,13 @@ NsTclTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST
  *
  * NsTclFTruncateObjCmd --
  *
- *	Implements ns_ftruncate as obj command. 
+ *	Implements ns_ftruncate as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -970,7 +970,7 @@ int
 NsTclFTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int length, fd;
-    
+
     if (objc != 2 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "fileId ?length?");
 	return TCL_ERROR;
@@ -984,7 +984,7 @@ NsTclFTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONS
     	return TCL_ERROR;
     }
     if (ftruncate(fd, length) != 0) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "ftruncate (\"", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "ftruncate (\"",
             Tcl_GetString(objv[1]), "\", ",
             Tcl_GetString(objv[2]) ? Tcl_GetString(objv[2]) : "0",
             ") failed:  ", Tcl_PosixError(interp), NULL);
@@ -1000,13 +1000,13 @@ NsTclFTruncateObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONS
  *
  * NsTclChmodObjCmd --
  *
- *	NsTclChmodCmd 
+ *	NsTclChmodCmd
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -1015,7 +1015,7 @@ int
 NsTclChmodObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int mode;
-    
+
     if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "filename mode");
 	return TCL_ERROR;
@@ -1026,8 +1026,8 @@ NsTclChmodObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
     }
 
     if (chmod(Tcl_GetString(objv[1]), (mode_t)mode) != 0) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "chmod (\"", 
-		Tcl_GetString(objv[1]), "\", ", 
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), "chmod (\"",
+		Tcl_GetString(objv[1]), "\", ",
 		Tcl_GetString(objv[2]),
 		") failed:  ", Tcl_PosixError(interp), NULL);
         return TCL_ERROR;
@@ -1045,10 +1045,10 @@ NsTclChmodObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST ob
  *	Implement the ns_chan command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -1177,7 +1177,7 @@ NsTclChanObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
 	shared = (objc == 3);
 	if (shared) {
 	    Ns_MutexLock(&servPtr->chans.lock);
-	    tabPtr = &servPtr->chans.table; 
+	    tabPtr = &servPtr->chans.table;
 	} else {
 	    tabPtr = &itPtr->chans;
 	}
@@ -1229,20 +1229,20 @@ NsTclChanObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST obj
 /*
  *----------------------------------------------------------------------
  *
- * SpliceChannel 
+ * SpliceChannel
  *
- *      Adds the shared channel in the interp/thread. 
+ *      Adds the shared channel in the interp/thread.
  *
  * Results:
- *      None.	
+ *      None.
  *
  * Side effects:
- *      New channel appears in the interp. 
+ *      New channel appears in the interp.
  *
  *----------------------------------------------------------------------
  */
 
-static void 
+static void
 SpliceChannel(Tcl_Interp *interp, Tcl_Channel chan)
 {
     Tcl_SpliceChannel(chan);
@@ -1254,20 +1254,20 @@ SpliceChannel(Tcl_Interp *interp, Tcl_Channel chan)
 /*
  *----------------------------------------------------------------------
  *
- * UnspliceChannel 
+ * UnspliceChannel
  *
- *      Divorces the channel from its owning interp/thread.	
+ *      Divorces the channel from its owning interp/thread.
  *
  * Results:
- *      None.	
+ *      None.
  *
  * Side effects:
- *      Channel is not accesible by Tcl scripts any more.	
+ *      Channel is not accesible by Tcl scripts any more.
  *
  *----------------------------------------------------------------------
  */
 
-static void 
+static void
 UnspliceChannel(Tcl_Interp *interp, Tcl_Channel chan)
 {
     Tcl_ClearChannelHandlers(chan);

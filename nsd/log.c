@@ -499,7 +499,6 @@ NsTclLogObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
 	       Tcl_Obj *CONST objv[])
 {
     Ns_LogSeverity severity;
-    LogCache *cachePtr;
     char *severitystr;
     int i;
     Ns_DString ds;
@@ -509,7 +508,6 @@ NsTclLogObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
     	return TCL_ERROR;
     }
     severitystr = Tcl_GetString(objv[1]);
-    cachePtr = LogGetCache();
     if (STRIEQ(severitystr, "notice")) {
 	severity = Notice;
     } else if (STRIEQ(severitystr, "warning")) {

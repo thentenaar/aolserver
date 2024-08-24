@@ -134,8 +134,8 @@ NsInitFd(void)
             rl.rlim_cur = rl.rlim_max;
 #endif
     	    if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-	        Ns_Log(Warning, "fd: setrlimit(RLIMIT_NOFILE, %lld) failed: %s",
-		       rl.rlim_max, strerror(errno));
+	        Ns_Log(Warning, "fd: setrlimit(RLIMIT_NOFILE, %lu) failed: %s",
+		      (unsigned long)rl.rlim_max, strerror(errno));
 	    }
 	}
 #ifdef USE_DUPHIGH
@@ -559,10 +559,10 @@ NsUnMap(void *addr, void *arg)
     /* TODO: Make this work on Win32. */
     Ns_Fatal("NsUnMap not supported");
 #else
-    size_t len = (size_t) arg;
+    unsigned long len = (unsigned long)arg;
 
     if (munmap(addr, len) != 0) {
-	Ns_Fatal("munmap(%p, %u) failed: %s", addr, len, strerror(errno));
+	Ns_Fatal("munmap(%p, %lu) failed: %s", addr, len, strerror(errno));
     }
 #endif
 }

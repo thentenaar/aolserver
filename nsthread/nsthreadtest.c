@@ -3,19 +3,19 @@
  * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://aolserver.com/.
- * 
+ *
  * Software distributed under the License is distributed on an "AS IS" basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
- * 
+ *
  * The Original Code is AOLserver Code and related documentation distributed by
  * AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online, Inc. Portions
  * created by AOL are Copyright (C) 1999 America Online, Inc. All Rights
  * Reserved.
- * 
+ *
  * Alternatively, the contents of this file may be used under the terms of the
  * GNU General Public License (the "GPL"), in which case the provisions of
  * GPL are applicable instead of those above.  If you wish to allow use of
@@ -97,7 +97,7 @@ Msg(char *fmt,...)
  * TlsLogArg -
  *
  *	Log and then free TLS slot data at thread exit.
- */ 
+ */
 
 void
 TlsLogArg(void *arg)
@@ -124,14 +124,14 @@ RecursiveStackCheck(int n)
     return n;
 }
 
-void 
+void
 CheckStackThread(void *arg)
 {
     int n;
 
     Ns_ThreadSetName("checkstack");
     n = RecursiveStackCheck(0);
-    Ns_ThreadExit((void *) n);
+    Ns_ThreadExit(INT2PTR(n));
 }
 
 /*
@@ -143,7 +143,7 @@ CheckStackThread(void *arg)
 void
 WorkThread(void *arg)
 {
-    int             i = (int) arg;
+    int            i = PTR2INT(arg);
     int            *ip;
     time_t          now;
     Ns_Thread       self;
@@ -203,7 +203,7 @@ WorkThread(void *arg)
     Ns_RWLockUnlock(&rwlock);
     Msg("rwlock unlocked");
     Msg("exiting");
-    Ns_ThreadExit((void *) i);
+    Ns_ThreadExit(INT2PTR(i));
 }
 
 /*
@@ -275,7 +275,7 @@ MemTime(int ns)
     fflush(stdout);
     Ns_GetTime(&start);
     for (i = 0; i < nthreads; ++i) {
-	Ns_ThreadCreate(MemThread, (void *) ns, 0, &tids[i]);
+	Ns_ThreadCreate(MemThread, INT2PTR(ns), 0, &tids[i]);
     }
     Ns_MutexLock(&lock);
     while (nrunning < nthreads) {
@@ -368,8 +368,8 @@ static int pgo;
 void
 PthreadTlsCleanup(void *arg)
 {
-    int i = (int) arg;
-    printf("pthread[%d]: log: %d\n", (int) pthread_self(), i);
+    long i = (long)arg;
+    printf("pthread[%ld]: log: %ld\n", (long)pthread_self(), i);
 }
 
 void *
@@ -377,7 +377,7 @@ Pthread(void *arg)
 {
     static Ns_Tls tls;
 
-    /* 
+    /*
      * Allocate TLS first time (this is recommended TLS
      * self-initialization style.
      */
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
     Ns_ThreadSetName("-main-");
 
     /*
-     * Jump directly to memory test if requested. 
+     * Jump directly to memory test if requested.
      */
 
     for (i = 1; i < argc; ++i) {
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
     Ns_TlsAlloc(&key, TlsLogArg);
     for (i = 0; i < 10; ++i) {
 	Msg("starting work thread %d", i);
-	Ns_ThreadCreate(WorkThread, (void *) i, 0, &threads[i]);
+	Ns_ThreadCreate(WorkThread, INT2PTR(i), 0, &threads[i]);
     }
     sleep(1);
     /* Ns_CondSignal(&cond); */
@@ -477,8 +477,8 @@ int main(int argc, char *argv[])
     }
 #if PTHREAD_TEST
     for (i = 0; i < 10; ++i) {
-	pthread_create(&tids[i], NULL, Pthread, (void *) i);
-	printf("pthread: create %d = %d\n", i, (int) tids[i]);
+	pthread_create(&tids[i], NULL, Pthread, INT2PTR(i));
+	printf("pthread: create %d = %d\n", i, PTR2INT(tids[i]));
 	Ns_ThreadYield();
     }
     Ns_MutexLock(&plock);
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
     Ns_CondBroadcast(&pcond);
     for (i = 0; i < 10; ++i) {
 	pthread_join(tids[i], &arg);
-	printf("pthread: join %d = %d\n", i, (int) arg);
+	printf("pthread: join %d = %d\n", i, PTR2INT(arg));
     }
 #endif
     Ns_ThreadSelf(&self);
@@ -502,7 +502,7 @@ int main(int argc, char *argv[])
     }
     for (i = 0; i < 10; ++i) {
         Ns_ThreadJoin(&threads[i], &arg);
-	printf("check stack %d = %d\n", i, (int) arg);
+	printf("check stack %d = %d\n", i, PTR2INT(arg));
     }
     /*Ns_ThreadEnum(DumpThreads, NULL);*/
     /*Ns_MutexEnum(DumpLocks, NULL);*/
