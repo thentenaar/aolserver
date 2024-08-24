@@ -37,7 +37,7 @@ if {$enabled} {
 
 proc _ns_stats.handleUrl {} {
     set page [ns_conn urlv [expr {[ns_conn urlc] - 1}]]
-    
+
     switch -exact $page {
         "adp.adp" -
         "cache.adp" -
@@ -54,7 +54,7 @@ proc _ns_stats.handleUrl {} {
             set rootname "index"
         }
     }
-      
+
     set user [nsv_get _ns_stats user]
     set password [nsv_get _ns_stats password]
 
@@ -108,7 +108,7 @@ proc _ns_stats.footer {} {
 proc _ns_stats.index {} {
     set html [_ns_stats.header]
     set baseUrl [nsv_get _ns_stats url]
-    
+
     append html "\
     o <a href=$baseUrl/adp.adp>ADP</a><br>
     o <a href=$baseUrl/cache.adp>Cache</a><br>
@@ -118,9 +118,9 @@ proc _ns_stats.index {} {
     o <a href=$baseUrl/process.adp>Process</a><br>
     o <a href=$baseUrl/sched.adp>Scheduled Procedures</a><br>
     o <a href=$baseUrl/threads.adp>Threads</a><br>"
-    
+
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -155,7 +155,7 @@ proc _ns_stats.adp {} {
     set html [_ns_stats.header ADP]
     append html [_ns_stats.results $col $colTitles adp.adp $rows $reverseSort]
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -182,11 +182,11 @@ proc _ns_stats.cache {} {
 
     set colTitles   [list Cache Max Current Entries Flushes Hits Misses "Hit Rate"]
     set rows        [_ns_stats.sortResults $results [expr {$col - 1}] $numericSort $reverseSort]
-    
+
     set html [_ns_stats.header Cache]
     append html [_ns_stats.results $col $colTitles cache.adp $rows $reverseSort]
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -238,9 +238,9 @@ proc _ns_stats.locks {} {
 
         lappend rows [list "<font color=$color>$name</font>" "<font color=$color>$owner</font>" "<font color=$color>$id</font>" "<font color=$color>$nlock</font>" "<font color=$color>$nbusy</font>" "<font color=$color>$contention</font>"]
     }
-    
+
     set html [_ns_stats.header Locks]
-    
+
     if {![ns_config -bool ns/threads mutexmeter 0]} {
         set msg "\
         Mutex metering not enabled. To enable add the following to your server configuration:
@@ -248,13 +248,13 @@ proc _ns_stats.locks {} {
 ns_section ns/threads
 ns_param mutexmeter true
 </pre>"
-        
+
         append html [_ns_stats.msg warning $msg]
     }
-    
+
     append html [_ns_stats.results $col $colTitles locks.adp $rows $reverseSort]
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -279,7 +279,7 @@ proc _ns_stats.log {} {
     set html [_ns_stats.header Log]
     append html "<font size=2><pre>$log</pre></font>"
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -290,7 +290,7 @@ proc _ns_stats.mempools {} {
     set tlocks 0
     set twaits 0
     set tfree 0
-    set tops 0   
+    set tops 0
 
     set html [_ns_stats.header Memory]
 
@@ -361,15 +361,13 @@ proc _ns_stats.mempools {} {
         <br>"
     }
 
+    set op N/A
+    set av N/A
+    set wr N/A
     set ov [expr {$talloc - $trequest}]
-    set op [format %4.2f [expr {$ov * 100.0 / $trequest}]]
-    set av [format %4.2f [expr {100.0 - ($tlocks * 100.0) / $tops}]]
-
-    if {$tlocks > 0} {
-	    set wr [format %4.2f [expr {$twaits*1.0 / $tlocks}]]
-    } else {
-	    set wr N/A
-    }
+    if {$trequest > 0} { set op [format %4.2f [expr {$ov * 100.0 / $trequest}]] }
+    if {$tops > 0} { set av [format %4.2f [expr {100.0 - ($tlocks * 100.0) / $tops}]] }
+    if {$tlocks > 0} { set wr [format %4.2f [expr {$twaits*1.0 / $tlocks}]] }
 
     append html "\
         </td>
@@ -393,9 +391,7 @@ proc _ns_stats.mempools {} {
     </tr>
     </table>"
 
-    append html [_ns_stats.footer]
-    
-    return $html
+    return [append html [_ns_stats.footer]]
 }
 
 proc _ns_stats.process {} {
@@ -444,7 +440,7 @@ proc _ns_stats.process {} {
     </table>"
 
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -506,7 +502,7 @@ proc _ns_stats.sched {} {
     set html [_ns_stats.header "Scheduled Procedures"]
     append html [_ns_stats.results $col $colTitles sched.adp $rows $reverseSort]
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -532,22 +528,22 @@ proc _ns_stats.threads {} {
         set create  [_ns_stats.fmtTime [lindex $t 4]]
         set proc    [lindex $t 5]
         set arg     [lindex $t 6]
-        
+
         if {"p:0x0" eq $proc} {
             set proc "NULL"
         }
-        
+
         if {"a:0x0" eq $arg} {
             set arg "NULL"
         }
-        
+
         lappend rows [list $thread $parent $id $flags $create $proc $arg]
     }
 
     set html [_ns_stats.header Threads]
     append html [_ns_stats.results $col $colTitles threads.adp $rows $reverseSort]
     append html [_ns_stats.footer]
-    
+
     return $html
 }
 
@@ -565,7 +561,7 @@ proc _ns_stats.results {{selectedColNum ""} {colTitles ""} {colUrl ""} {rows ""}
             set colColor($colNum)           "#ffffff"
         }
     }
-    
+
     set html "\
     <table border=0 cellpadding=0 cellspacing=1 bgcolor=#cccccc>
     <tr>
@@ -574,7 +570,7 @@ proc _ns_stats.results {{selectedColNum ""} {colTitles ""} {colUrl ""} {rows ""}
         <tr>"
 
     set i 1
-    
+
     foreach title $colTitles {
         set url $colUrl
 
@@ -602,7 +598,7 @@ proc _ns_stats.results {{selectedColNum ""} {colTitles ""} {colUrl ""} {rows ""}
 
         incr i
     }
-   
+
     append html "</tr>"
 
     foreach row $rows {
@@ -628,13 +624,13 @@ proc _ns_stats.results {{selectedColNum ""} {colTitles ""} {colUrl ""} {rows ""}
 
         append html "</tr>"
     }
-    
+
     append html "\
         </table>
         </td>
     </tr>
     </table>"
-    
+
     return $html
 }
 
@@ -757,7 +753,7 @@ proc _ns_stats.cmpField {v1 v2} {
             set cmp [_ns_stats.cmpNumeric $v1 $v2]
         }
     } else {
-        if {$_sortListTmp(reverse)} { 
+        if {$_sortListTmp(reverse)} {
             set cmp [string compare $v2 $v1]
         } else {
             set cmp [string compare $v1 $v2]
