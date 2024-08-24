@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -28,7 +28,7 @@
  */
 
 
-/* 
+/*
  * nslog.c --
  *
  *	This file implements the access log using NCSA Common Log format.
@@ -88,7 +88,7 @@ static Ns_TclInterpInitProc AddCmds;
  *
  * Side effects:
  *	Log file is opened, trace routine is registered, and, if
- *	configured, log file roll signal and scheduled procedures 
+ *	configured, log file roll signal and scheduled procedures
  *	are registered.
  *
  *----------------------------------------------------------------------
@@ -132,17 +132,17 @@ NsLog_ModInit(char *server, char *module)
 
     path = Ns_ConfigGetPath(server, module, NULL);
     logPtr->file = Ns_ConfigGetValue(path, "file");
-    if (logPtr->file == NULL) {
+    if (!logPtr->file) {
     	logPtr->file = "access.log";
     }
-    if (Ns_PathIsAbsolute(logPtr->file) == NS_FALSE) {
+    if (*logPtr->file && strcmp(logPtr->file, "-") && Ns_PathIsAbsolute(logPtr->file) == NS_FALSE) {
     	Ns_DString 	 ds;
 
 	Ns_DStringInit(&ds);
 	Ns_ModulePath(&ds, server, module, NULL, NULL);
 	if (mkdir(ds.string, 0755) != 0 && errno != EEXIST
 	    && errno != EISDIR) {
-	    Ns_Log(Error, "nslog: mkdir(%s) failed: %s", 
+	    Ns_Log(Error, "nslog: mkdir(%s) failed: %s",
 		   ds.string, strerror(errno));
 	    Ns_DStringFree(&ds);
 	    return NS_ERROR;
@@ -190,24 +190,24 @@ NsLog_ModInit(char *server, char *module)
     /*
      * Schedule various log roll and shutdown options.
      */
-
-    if (!Ns_ConfigGetInt(path, "rollhour", &hour) ||
-	hour < 0 || hour > 23) {
-	hour = 0;
+    if (*logPtr->file && strcmp(logPtr->file, "-")) {
+        if (!Ns_ConfigGetInt(path, "rollhour", &hour) ||
+    	hour < 0 || hour > 23) {
+    	hour = 0;
+        }
+        if (!Ns_ConfigGetBool(path, "rolllog", &opt)) {
+            opt = 1;
+        }
+        if (opt) {
+            Ns_ScheduleDaily((Ns_SchedProc *) LogRollCallback, logPtr, 0, hour, 0, NULL);
+        }
+        if (!Ns_ConfigGetBool(path, "rollonsignal", &opt)) {
+            opt = 0;
+        }
+        if (opt) {
+            Ns_RegisterAtSignal(LogRollCallback, logPtr);
+        }
     }
-    if (!Ns_ConfigGetBool(path, "rolllog", &opt)) {
-        opt = 1;
-    }
-    if (opt) {
-        Ns_ScheduleDaily((Ns_SchedProc *) LogRollCallback, logPtr, 0, hour, 0, NULL);
-    }
-    if (!Ns_ConfigGetBool(path, "rollonsignal", &opt)) {
-        opt = 0;;
-    }
-    if (opt) {
-        Ns_RegisterAtSignal(LogRollCallback, logPtr);
-    }
-
     LogConfigExtHeaders(logPtr, path);
 
     /*
@@ -223,7 +223,6 @@ NsLog_ModInit(char *server, char *module)
     return NS_OK;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -241,7 +240,7 @@ NsLog_ModInit(char *server, char *module)
  *----------------------------------------------------------------------
  */
 
-static void 
+static void
 LogTrace(void *arg, Ns_Conn *conn)
 {
     Ns_DString     ds;
@@ -249,7 +248,7 @@ LogTrace(void *arg, Ns_Conn *conn)
     int            quote, n, status, i;
     char           buf[100];
     Log		  *logPtr = arg;
-     
+
     Ns_Time        now, diff;
 
     /*
@@ -266,7 +265,7 @@ LogTrace(void *arg, Ns_Conn *conn)
 
     /*
      * Append the peer address and auth user (if any).
-     * Watch for users comming from proxy servers. 
+     * Watch for users comming from proxy servers.
      */
 
     if (conn->headers && (p = Ns_SetIGet(conn->headers, "X-Forwarded-For"))) {
@@ -309,7 +308,7 @@ LogTrace(void *arg, Ns_Conn *conn)
      */
 
     if (conn->request && conn->request->line) {
-	
+
 	if (logPtr->suppressquery) {
 	    /*
 	     * Don't display query data.
@@ -404,7 +403,6 @@ LogTrace(void *arg, Ns_Conn *conn)
     }
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -480,7 +478,6 @@ LogCmd(ClientData arg, Tcl_Interp *interp, int argc, CONST char **argv)
     return TCL_OK;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -505,7 +502,6 @@ LogArg(Tcl_DString *dsPtr, void *arg)
     Tcl_DStringAppendElement(dsPtr, logPtr->file);
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -527,6 +523,11 @@ LogOpen(Log *logPtr)
 {
     int fd;
 
+    if (!*logPtr->file || !strcmp(logPtr->file, "-")) {
+        logPtr->fd = STDOUT_FILENO;
+        return NS_OK;
+    }
+
     fd = open(logPtr->file, O_APPEND|O_WRONLY|O_CREAT, 0644);
     if (fd < 0) {
     	Ns_Log(Error, "nslog: error '%s' opening '%s'",
@@ -541,7 +542,6 @@ LogOpen(Log *logPtr)
     return NS_OK;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -567,21 +567,21 @@ LogClose(Log *logPtr)
     if (logPtr->fd >= 0) {
 	Ns_Log(Notice, "nslog: closing '%s'", logPtr->file);
 	status = LogFlush(logPtr, &logPtr->buffer);
-	close(logPtr->fd);
+	if (logPtr->fd != STDOUT_FILENO)
+	    close(logPtr->fd);
 	logPtr->fd = -1;
 	Ns_DStringFree(&logPtr->buffer);
     }
     return status;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
  * LogFlush --
  *
  *	Flush a log buffer to the open log file.  Note:  The mutex
- *	is assumed held during call. 
+ *	is assumed held during call.
  *
  * Results:
  *	None.
@@ -600,7 +600,7 @@ LogFlush(Log *logPtr, Ns_DString *dsPtr)
 	    write(logPtr->fd, dsPtr->string, (size_t)dsPtr->length) != dsPtr->length) {
 	    Ns_Log(Error, "nslog: "
 		   "logging disabled: write() failed: '%s'", strerror(errno));
-	    close(logPtr->fd);
+	    if (logPtr->fd != STDOUT_FILENO) close(logPtr->fd);
 	    logPtr->fd = -1;
 	}
     	Ns_DStringTrunc(dsPtr, 0);
@@ -611,7 +611,6 @@ LogFlush(Log *logPtr, Ns_DString *dsPtr)
     return NS_OK;
 }
 
-
 /*
  *----------------------------------------------------------------------
  *
@@ -632,10 +631,12 @@ LogFlush(Log *logPtr, Ns_DString *dsPtr)
 static int
 LogRoll(Log *logPtr)
 {
-    int 	status;
+    int 	status = NS_OK;
 
-    status = NS_OK;
-    (void) LogClose(logPtr);
+    (void)LogClose(logPtr);
+    if (logPtr->fd == STDOUT_FILENO)
+        goto ret;
+
     if (access(logPtr->file, F_OK) == 0) {
     	if (logPtr->rollfmt == NULL) {
 	    status = Ns_RollFile(logPtr->file, logPtr->maxbackup);
@@ -653,7 +654,7 @@ LogRoll(Log *logPtr)
 	    if (access(ds.string, F_OK) == 0) {
 		status = Ns_RollFile(ds.string, logPtr->maxbackup);
 	    } else if (errno != ENOENT) {
-		Ns_Log(Error, "nslog: access(%s, F_OK) failed: '%s'", 
+		Ns_Log(Error, "nslog: access(%s, F_OK) failed: '%s'",
 	      	       ds.string, strerror(errno));
 		status = NS_ERROR;
 	    }
@@ -669,10 +670,11 @@ LogRoll(Log *logPtr)
 	}
     }
     status = LogOpen(logPtr);
-    return status;
-}    	
 
-
+ret:
+    return status;
+}
+
 /*
  *----------------------------------------------------------------------
  *
@@ -716,7 +718,6 @@ LogRollCallback(void *arg)
     LogCallback(LogRoll, arg, "roll");
 }
 
-
 /*
  *----------------------------------------------------------------------
  *

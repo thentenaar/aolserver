@@ -11,7 +11,7 @@
  *
  * The Original Code is AOLserver Code and related documentation
  * distributed by AOL.
- * 
+ *
  * The Initial Developer of the Original Code is America Online,
  * Inc. Portions created by AOL are Copyright (C) 1999 America Online,
  * Inc. All Rights Reserved.
@@ -102,7 +102,7 @@ static int maxbuffer;;
  *	None.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -159,7 +159,9 @@ NsLogConf(void)
     maxlevel = NsParamBool("logmaxlevel", INT_MAX);
     maxbuffer  = NsParamBool("logmaxbuffer", 10);
     file = NsParamString("serverlog", "server.log");
-    if (!Ns_PathIsAbsolute(file)) {
+    if (file && *file && strcmp(file, "-"))
+        flags &= ~LOG_ROLL;
+    else if (!Ns_PathIsAbsolute(file)) {
 	Ns_DString ds;
 
 	Ns_DStringInit(&ds);
@@ -174,13 +176,13 @@ NsLogConf(void)
  *
  * Ns_InfoErrorLog --
  *
- *	Returns the filename of the log file. 
+ *	Returns the filename of the log file.
  *
  * Results:
- *	Log file name or NULL if none. 
+ *	Log file name or NULL if none.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -197,14 +199,14 @@ Ns_InfoErrorLog(void)
  *
  * Ns_LogRoll --
  *
- *	Signal handler for SIG_HUP which will roll the files. Also a 
- *	tasty snack from Stuckey's. 
+ *	Signal handler for SIG_HUP which will roll the files. Also a
+ *	tasty snack from Stuckey's.
  *
  * Results:
- *	NS_OK/NS_ERROR 
+ *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	Will rename the log file and reopen it. 
+ *	Will rename the log file and reopen it.
  *
  *----------------------------------------------------------------------
  */
@@ -212,7 +214,7 @@ Ns_InfoErrorLog(void)
 int
 Ns_LogRoll(void)
 {
-    if (file != NULL) {
+    if (file && *file && strcmp(file, "-")) {
         if (access(file, F_OK) == 0) {
             Ns_RollFile(file, maxback);
         }
@@ -230,13 +232,13 @@ Ns_LogRoll(void)
  *
  * Ns_Log --
  *
- *	Spit a message out to the server log. 
+ *	Spit a message out to the server log.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -265,14 +267,14 @@ ns_serverLog(Ns_LogSeverity severity, char *fmt, va_list *vaPtr)
  *
  * Ns_Fatal --
  *
- *	Spit a message out to the server log with severity level of 
- *	Fatal, and then terminate the nsd process. 
+ *	Spit a message out to the server log with severity level of
+ *	Fatal, and then terminate the nsd process.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
- *	WILL CAUSE AOLSERVER TO EXIT! 
+ *	WILL CAUSE AOLSERVER TO EXIT!
  *
  *----------------------------------------------------------------------
  */
@@ -304,8 +306,8 @@ Ns_Fatal(char *fmt, ...)
  *	Pointer to given buffer.
  *
  * Side effects:
- *	Will put data into timeBuf, which must be at least 41 bytes 
- *	long. 
+ *	Will put data into timeBuf, which must be at least 41 bytes
+ *	long.
  *
  *----------------------------------------------------------------------
  */
@@ -329,10 +331,10 @@ Ns_LogTime(char *timeBuf)
  *
  * NsLogOpen --
  *
- *	Open the log file. Adjust configurable parameters, too. 
+ *	Open the log file. Adjust configurable parameters, too.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	Configures this module to use the newly opened log file.
@@ -350,7 +352,7 @@ NsLogOpen(void)
      */
 
     if (LogReOpen() != NS_OK) {
-	Ns_Fatal("log: failed to open server log '%s': '%s'", 
+	Ns_Fatal("log: failed to open server log '%s': '%s'",
 		 file, strerror(errno));
     }
     if (flags & LOG_ROLL) {
@@ -364,13 +366,13 @@ NsLogOpen(void)
  *
  * NsTclLogRollObjCmd --
  *
- *	Implements ns_logroll as obj command. 
+ *	Implements ns_logroll as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -394,10 +396,10 @@ NsTclLogRollObjCmd(ClientData arg, Tcl_Interp *interp, int objc, Tcl_Obj *CONST 
  *	and release.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -485,10 +487,10 @@ NsTclLogCtlObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
  *	Implements ns_log as obj command.
  *
  * Results:
- *	Tcl result. 
+ *	Tcl result.
  *
  * Side effects:
- *	See docs. 
+ *	See docs.
  *
  *----------------------------------------------------------------------
  */
@@ -556,7 +558,7 @@ NsTclLogObjCmd(ClientData arg, Tcl_Interp *interp, int objc,
  *	severity.
  *
  * Results:
- *	None. 
+ *	None.
  *
  * Side effects:
  *	May write immediately or later through buffer.
@@ -714,7 +716,7 @@ LogFlush(LogCache *cachePtr)
 
     Ns_MutexLock(&lock);
     if (flushProcPtr == NULL) {
-	(void) write(2, dsPtr->string, (size_t)dsPtr->length);
+	(void)write(STDERR_FILENO, dsPtr->string, (size_t)dsPtr->length);
     } else {
 	(*flushProcPtr)(dsPtr->string, (size_t)dsPtr->length);
     }
@@ -729,15 +731,15 @@ LogFlush(LogCache *cachePtr)
  *
  * LogReOpen --
  *
- *	Open the log file name specified in the 'logFile' global. If 
- *	it's successfully opened, make that file the sink for stdout 
- *	and stderr too. 
+ *	Open the log file name specified in the 'logFile' global. If
+ *	it's successfully opened, make that file the sink for stdout
+ *	and stderr too.
  *
  * Results:
- *	NS_OK/NS_ERROR 
+ *	NS_OK/NS_ERROR
  *
  * Side effects:
- *	None. 
+ *	None.
  *
  *----------------------------------------------------------------------
  */
@@ -745,10 +747,12 @@ LogFlush(LogCache *cachePtr)
 static int
 LogReOpen(void)
 {
-    int fd; 
-    int status;
+    int fd;
+    int status = NS_OK;
 
-    status = NS_OK;
+    if (!file || !*file || !strcmp(file, "-"))
+        goto ret;
+
     fd = open(file, O_WRONLY|O_APPEND|O_CREAT, 0644);
     if (fd < 0) {
         Ns_Log(Error, "log: failed to re-open log file '%s': '%s'",
@@ -758,31 +762,33 @@ LogReOpen(void)
 	/*
 	 * Route stderr to the file
 	 */
-	
+
         if (fd != STDERR_FILENO && dup2(fd, STDERR_FILENO) == -1) {
             fprintf(stdout, "dup2(%s, STDERR_FILENO) failed: %s\n",
 		file, strerror(errno));
             status = NS_ERROR;
         }
-	
+
 	/*
 	 * Route stdout to the file
 	 */
-	
+
         if (dup2(STDERR_FILENO, STDOUT_FILENO) == -1) {
             Ns_Log(Error, "log: failed to route stdout to file: '%s'",
 		   strerror(errno));
             status = NS_ERROR;
         }
-	
+
 	/*
 	 * Clean up dangling 'open' reference to the fd
 	 */
-	
+
         if (fd != STDERR_FILENO && fd != STDOUT_FILENO) {
             close(fd);
         }
     }
+
+ret:
     return status;
 }
 
@@ -842,7 +848,7 @@ LogTime(LogCache *cachePtr, int gmtoff, long *usecPtr)
 	    } else {
 		sign = '+';
 	    }
-	    sprintf(bp + n, 
+	    sprintf(bp + n,
 		    " %c%02d%02d]", sign, gmtoffset / 60, gmtoffset % 60);
 	}
     }
@@ -913,9 +919,9 @@ LogFreeCache(void *arg)
 
 /*
  *----------------------------------------------------------------------
- *      
+ *
  * Ns_SetLogFlushProc --
- * 
+ *
  *	Set the proc to call when writing the log. You probably want
  *	to have a Ns_RegisterAtShutdown() call too so you can
  *	close/finish up whatever special logging you are doing.
@@ -927,8 +933,8 @@ LogFreeCache(void *arg)
  *	None.
  *
  *----------------------------------------------------------------------
- */ 
-    
+ */
+
 void
 Ns_SetLogFlushProc(Ns_LogFlushProc *procPtr)
 {
@@ -961,11 +967,11 @@ Ns_SetLogFlushProc(Ns_LogFlushProc *procPtr)
  *
  * Side effects:
  *	None.
- * 
+ *
  *----------------------------------------------------------------------
- */     
- 
-void    
+ */
+
+void
 Ns_SetNsLogProc(Ns_LogProc *procPtr)
 {
     nslogProcPtr = procPtr;
