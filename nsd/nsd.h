@@ -30,10 +30,6 @@
 #ifndef NSD_H
 #define NSD_H
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
 #define NSD_EXPORTS
 #include "ns.h"
 
@@ -61,7 +57,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <grp.h>
 
 #endif	/* WIN32 */
 

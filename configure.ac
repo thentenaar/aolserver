@@ -11,7 +11,7 @@
 #
 # The Original Code is AOLserver Code and related documentation
 # distributed by AOL.
-# 
+#
 # The Initial Developer of the Original Code is America Online,
 # Inc. Portions created by AOL are Copyright (C) 1999 America Online,
 # Inc. All Rights Reserved.
@@ -25,33 +25,64 @@
 # replace them with the notice and other provisions required by the GPL.
 # If you do not delete the provisions above, a recipient may use your
 # version of this file under either the License or the GPL.
-# 
+#
 #
 # $Header: /Users/dossy/Desktop/cvs/aolserver/configure.in,v 1.25 2008/05/13 21:25:23 dvrsn Exp $
 #
 
 #
-# configure.in --
+# configure.ac --
 #
 #    AOLserver configure script.
 #
 
-AC_INIT(include/ns.h)
-AC_PREREQ(2.13)
-AC_PREFIX_DEFAULT(/usr/local/aolserver)
+AC_INIT([aolserver], [4.5], [http://github.com/thentenaar/aolserver])
+AC_CONFIG_SRCDIR([include/ns.h])
+AC_PREREQ([2.69])
+AC_PREFIX_DEFAULT(/opt/aolserver)
+AC_LANG([C])
+AC_CHECK_PROGS(TCLSH, [tclsh tclsh8.5 tclsh8.6 tclsh9.0])
+AC_CANONICAL_TARGET
+AC_TYPE_INTPTR_T
 
 #
 # Include and verify Tcl config located by --with-tcl=
 #
+AC_ARG_WITH(tcl, AS_HELP_STRING([--with-tcl=DIR],[directory containing (tclConfig.sh)]))
+tclconfig=${with_tcl}/tclConfig.sh
+if ! test -r ${with_tcl}/tclConfig.sh; then
+	# Search the usual default locations
+	for bits in lib lib64; do
+		libdir=${prefix}/${bits}
+		if test -r ${libdir}/tclConfig.sh; then
+		  tclconfig=${libdir}/tclConfig.sh
+		  break
+		else
+		  for i in tcl8.5 tcl8.6 tcl9.0; do
+			if test -r ${libdir}/$i/tclConfig.sh; then
+			  tclconfig=${libdir}/$i/tclConfig.sh
+			  break
+			fi
+		  done
+		fi
 
-SC_PATH_TCLCONFIG
-SC_LOAD_TCLCONFIG
+		if test -r $tclconfig; then
+			break
+		fi
+	done
+fi
+
+if ! test -r ${tclconfig}; then
+	AC_MSG_ERROR([tclConfig.sh not found])
+fi
+
+AC_MSG_RESULT([loading TCL configuration from ${tclconfig}])
+. ${tclconfig}
+
 if test "${TCL_THREADS}" != "1"; then
     AC_MSG_ERROR([must build tcl with --enable-threads])
 fi
-SC_ENABLE_SYMBOLS
 
-AC_SUBST(TCLSH)
 AC_SUBST(TCL_LIB_SPEC)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_INCLUDE_SPEC)
@@ -69,7 +100,6 @@ AC_SUBST(TCL_CFLAGS_OPTIMIZE)
 AC_SUBST(TCL_CFLAGS_WARNING)
 AC_SUBST(TCL_EXTRA_CFLAGS)
 AC_SUBST(TCL_SHLIB_CFLAGS)
-AC_SUBST(TCL_DEFS)
 
 if test "${CC+set}" != "set"; then
     CC=$TCL_CC
@@ -80,7 +110,7 @@ AC_PROG_CC
 # TCL_SHLIB_LD from tclConfig.sh is not quite right for aolserver.
 #
 
-test "x$prefix" = "xNONE" && prefix="/usr/local/aolserver"
+test "x$prefix" = "xNONE" && prefix="/opt/aolserver"
 system=`uname`
 case "$system" in
     Darwin)
@@ -140,35 +170,23 @@ AC_SUBST(AOLSERVER)
 #
 # Additional AOLserver checks.
 #
-
-AC_CHECK_HEADERS(inttypes.h)
-AC_CHECK_FUNCS(timegm fork1 drand48 random _NSGetEnviron)
-
-#
-# Poll is currently broken on OS/X.
-#
-
-system=`uname`
-if test "x$system" != "xDarwin"
-then
-    AC_CHECK_FUNCS(poll)
-fi
-
+CPPFLAGS="${CPPFLAGS} -D_XOPEN_SOURCE=500 -D_DEFAULT_SOURCE"
+AC_CHECK_FUNCS(timegm fork1 drand48 random _NSGetEnviron poll)
 AC_CHECK_HEADER(dl.h, AC_DEFINE(USE_DLSHL),)
 AC_MSG_CHECKING([need for dup high])
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 int
 main(int argc, char **argv)
 {
     return (sizeof(stdout->_file) == 1) ? 0 : 1;
-}], AC_DEFINE(USE_DUPHIGH) as_ok=yes, as_ok=no, as_ok=no)
+}]])],[AC_DEFINE(USE_DUPHIGH) as_ok=yes],[as_ok=no],[as_ok=no])
 AC_MSG_RESULT($as_ok)
 
 AC_CACHE_CHECK([for shared libgcc], ac_cv_shared_libgcc, [
     ac_save_LIBS="$LIBS"
     LIBS="-lgcc_s $LIBS"
-    AC_TRY_LINK(, [return 0], ac_cv_shared_libgcc=yes, ac_cv_shared_libgcc=no)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[return 0]])],[ac_cv_shared_libgcc=yes],[ac_cv_shared_libgcc=no])
     LIBS="$ac_save_LIBS"
 ])
 if test "$ac_cv_shared_libgcc" = "yes" ; then
@@ -184,8 +202,9 @@ if test "${ac_cv_func_getaddrinfo}" = "yes" \
     has_threadsafe_dns=yes
 fi
 if test "${has_threadsafe_dns}" != "yes" ; then
-    AC_HAVE_GETHOSTBYNAME_R
-    AC_HAVE_GETHOSTBYADDR_R
+    AC_SEARCH_LIBS(gethostbyname_r, nsl)
+    AC_SEARCH_LIBS(gethostbyaddr_r, nsl)
+    AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r)
     if test "${ac_cv_func_gethostbyname_r}" = "yes" \
         -a "${ac_cv_func_gethostbyaddr_r}" = "yes" ; then
         has_threadsafe_dns=yes
@@ -195,8 +214,16 @@ if test "${has_threadsafe_dns}" != "yes" ; then
   AC_MSG_WARN([dns queries will use non-threadsafe calls which could result in server instability])
 fi
 
+AC_SEARCH_LIBS(pthread_attr_getstack, pthread)
+AC_SEARCH_LIBS(pthread_attr_getstackaddr, pthread)
+AC_SEARCH_LIBS(pthread_getattr_np, pthread)
+AC_SEARCH_LIBS(pthread_get_stackaddr_np, pthread)
+AC_SEARCH_LIBS(pthread_attr_get_np, pthread)
+AC_CHECK_FUNCS(pthread_attr_getstackaddr pthread_getattr_np pthread_get_stackaddr_np pthread_attr_get_np)
+
 #
 # Create Makefile.global.
 #
 
-AC_OUTPUT(include/ns.mak)
+AC_CONFIG_FILES([include/ns.mak])
+AC_OUTPUT

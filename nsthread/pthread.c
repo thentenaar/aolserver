@@ -37,16 +37,14 @@
 #include "thread.h"
 #include <pthread.h>
 
-/* TODO: Move to configure. */
-#ifdef __APPLE__
-#define HAVE_PTHREAD_GET_STACKADDR_NP 1
-#endif
-#ifdef __linux
-#define HAVE_PTHREAD_GETATTR_NP 1
+/* Same function, different name */
+#if !defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GET_NP)
+#define pthread_getattr_np pthread_attr_get_np
+#define HAVE_PTHREAD_GETATTR_NP
 #endif
 
-#if defined(HAVE_PTHREAD_GETATTR_NP) && defined(GETATTRNP_NOT_DECLARED)
-extern int pthread_getattr_np(pthread_t tid, pthread_attr_t *attr);
+#if defined(__linux) && defined(HAVE_PTHREAD_GETATTR_NP) && !defined(_GNU_SOURCE)
+extern int pthread_getattr_np(pthread_t, pthread_attr_t *);
 #endif
 
 /*
@@ -880,13 +878,12 @@ GetThread(void)
 static Thread *
 NewThread(void)
 {
+    int err;
     Thread *thrPtr;
     static unsigned int nextuid = 0;
-    pthread_t tid;
 #if defined(HAVE_PTHREAD_GETATTR_NP)
     static char *func = "NewThread";
     pthread_attr_t attr;
-    int err;
 #endif
 
     thrPtr = ns_calloc(1, sizeof(Thread));
@@ -894,28 +891,35 @@ NewThread(void)
     thrPtr->uid = nextuid++;
     Ns_MutexUnlock(&uidlock);
 
-    tid = pthread_self();
-#if defined(HAVE_PTHREAD_GETATTR_NP)
-    err = pthread_getattr_np(tid, &attr);
+#if defined(HAVE_PTHREAD_GET_STACKADDR_NP)
+    thrPtr->stackaddr = pthread_get_stackaddr_np(pthread_self());
+    thrPtr->stacksize = pthread_get_stacksize_np(pthread_self()) - guardsize;
+#elif defined(HAVE_PTHREAD_GETATTR_NP)
+    pthread_attr_init(&attr);
+    err = pthread_getattr_np(pthread_self(), &attr);
     if (err != 0) {
 	NsThreadFatal(func, "pthread_getattr_np", err);
     }
+# if defined(HAVE_PTHREAD_ATTR_GETSTACK)
+	if ((err = pthread_attr_getstack(&attr, &thrPtr->stackaddr, &thrPtr->stacksize)))
+	    NsThreadFatal(func, "pthread_attr_getstack", err);
+# else
+#  if defined(HAVE_PTHREAD_ATTR_GETSTACKADDR)
     err = pthread_attr_getstackaddr(&attr, &thrPtr->stackaddr);
     if (err != 0) {
 	NsThreadFatal(func, "pthread_attr_getstackaddr", err);
     }
+#  endif
     err = pthread_attr_getstacksize(&attr, &thrPtr->stacksize);
     if (err != 0) {
 	NsThreadFatal(func, "pthread_attr_getstacksize", err);
     }
     thrPtr->stacksize -= guardsize;
+# endif
     err = pthread_attr_destroy(&attr);
     if (err != 0) {
 	NsThreadFatal(func, "pthread_attr_destroy", err);
     }
-#elif defined(HAVE_PTHREAD_GET_STACKADDR_NP)
-    thrPtr->stackaddr = pthread_get_stackaddr_np(tid);
-    thrPtr->stacksize = pthread_get_stacksize_np(tid) - guardsize;
 #endif
     return thrPtr;
 }

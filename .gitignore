@@ -2,8 +2,11 @@
 *.a
 *.so
 .*.sw?
+*~
+configure
 config.log
 config.status
+autom4te.cache
 nsd/nsd
 nstclsh/nstclsh
 nsthread/nsthreadtest
